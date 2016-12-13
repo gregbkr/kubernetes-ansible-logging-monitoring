@@ -4,11 +4,11 @@
 - 1 master node running : k8s for container orchestration
 - 2(or more) slave nodes : running the actual containers (workers)
 - Elk: we will send all k8s container logs to an elasticsearch DB, via fluentd. 
-- Visualize the logs with kibana and example dashboard
-- k8s dashboard addon (not elk), where you can visualize k8s in a GUI. 
+- Visualize the logs with kibana and an example dashboard
+- k8s dashboard addon (not elk dashboard), where you can visualize k8s component in a GUI. 
 
 *Prerequisit:*
-- Cloudstack cloud provider (ex: exoscale)
+- Cloudstack cloud provider (ex: exoscale) | but you can deploy anywhere else with a bit of adaptation in ansible 
 - An ubuntu VM where you will run ansible recipes, and manage k8s with kubeclt
 
 # Deploy kubernetes
