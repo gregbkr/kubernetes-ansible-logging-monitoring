@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: logstash
+  labels:
+    app: logstash
+spec:
+  containers:
+  - name: logstash
+    image: logstash:2
+    ports:
+    - containerPort: 5000
+    - containerPort: 5001
+    args: [ "-f", "/opt/logstash/conf.d/logstash.conf" ]
+    volumeMounts:
+    - name: logstash
+      mountPath: /opt/logstash/conf.d
+  volumes:
+  - name: logstash
+    configMap:
+      name: logstash
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  selector:
+    app: logstash
+  type: NodePort
+  ports:
+  - name: syslog
+    port: 5000
+    protocol: UDP
+  - name: filebeat
+    port: 5001
+    protocol: TCP
