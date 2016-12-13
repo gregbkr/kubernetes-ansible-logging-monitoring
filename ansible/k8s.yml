@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    ssh_key: foobar
+    k8s_version: 1.4.6
+    k8s_num_nodes: 2
+    k8s_security_group_name: k8s
+    k8s_node_prefix: k8s
+    k8s_username: foobar
+    k8s_password: FdKPSuwQ
+# This template name is specific to http://exoscale.ch, replace it
+    k8s_template: Linux CoreOS stable 1122 64-bit 50G Disk (2016-09-06-dcb493)
+    k8s_instance_type: Medium
+
+    k8s_binaries: https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version }}/bin
+
+  roles:
+    - common
+    - k8s
