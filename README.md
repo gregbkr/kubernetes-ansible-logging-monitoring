@@ -15,18 +15,17 @@
 
 ### Clone repo
 
-    git clone https://github/gregbkr/k8s-ansible-elk k8s && cd k8s
+    git clone https://github.com/gregbkr/k8s-ansible-elk.git k8s && cd k8s
 
 ### Deploy k8s on Cloudstack infra
 
 I will use the setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
 I just added few lines in file: roles/k8s/templates/k8s-node.j2 to be able to get log with fluentd
+(# In order to have logs in /var/log/containers to be pickup by fluentd
+    Environment="RKT_OPTS=--volume dns,kind=host,source=/etc/resolv.conf --mount volume=dns,target=/etc/resolv.conf --volume var-log,kind=host,source=/var/log --mount volume=var-log,target=/var/log" )
 
-    # In order to have logs in /var/log/containers to be pickup by fluentd
-    Environment="RKT_OPTS=--volume dns,kind=host,source=/etc/resolv.conf --mount volume=dns,target=/etc/resolv.conf --volume var-log,kind=host,source=/var/log --mount volume=var-log,target=/var/log"
-
-    cd ansible-cloudstack
-    nano k8s.yml   <-- edit k8s version, num_node, ssh_key if you want to use your own
+    cd ansible
+    nano k8s.yml      <-- edit k8s version, num_node, ssh_key if you want to use your own
 
 Run recipe
 
