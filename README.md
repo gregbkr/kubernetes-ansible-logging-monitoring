@@ -1,4 +1,4 @@
-# Deploy kubernestes via ansible (on cloudstack cloud servers) with elk (container logging) support #
+# Deploy kubernetes via ansible (on cloudstack cloud servers) with elk (container logging) support #
 
 ## What you will get:
 - 1 master node running : k8s for container orchestration
