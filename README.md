@@ -11,13 +11,13 @@
 - Cloudstack cloud provider (ex: exoscale) | but you can deploy anywhere else with a bit of adaptation in ansible 
 - An ubuntu VM where you will run ansible recipes, and manage k8s with kubeclt
 
-# Deploy kubernetes
+# 1. Deploy kubernetes
 
-### Clone repo
+### 1.1 Clone repo
 
     git clone https://github.com/gregbkr/k8s-ansible-elk.git k8s && cd k8s
 
-### Deploy k8s on Cloudstack infra
+### 1.2 Deploy k8s on Cloudstack infra
 
 I will use the setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
 I just added few lines in file: roles/k8s/templates/k8s-node.j2 to be able to get log with fluentd
@@ -33,20 +33,20 @@ Run recipe
 	watch kubectl get node    <-- wait for the nodes to be up
 
 
-### install kubectl locally (with same version as server)
+### 1.3 install kubectl locally (with same version as server)
 
     curl -O https://storage.googleapis.com/kubernetes-release/release/v1.4.6/bin/linux/amd64/kubectl
     chmod +x kubectl
     mv kubectl /usr/local/bin/kubectl
 
-### Checks:
+### 1.4 Checks:
 	
 	kubectl get all --all-namespaces    <-- should have no errors here
 	
 
-# Deploy elk v5 to collect k8s logs
+# 2. Deploy elk v5 to collect k8s logs
 
-### Pre-requisit 
+### 2.1 Pre-requisit 
 On all node: Fix an issue with hungry es v5
     ssh -i ~/.ssh/id_rsa_foobar core@185.19.29.212
     sudo sysctl -w vm.max_map_count=262144
@@ -55,20 +55,20 @@ make it persistent:
     vm.max_map_count=262144
     sudo sysctl --system
 	
-### run elasticsearch, kibana
+### 2.2 run elasticsearch, kibana
 
     cd .. 
     kubectl create -f es.yaml
     kubectl create -f kibana.yaml
 
-### Check services with ubuntu temp container
+### 2.3 Check services with ubuntu temp container
 
     kubectl create -f utils/ubuntu.yaml
-	kubeclt get all
+	kubeclt get all       <-- if you see es container restarting, please restart all nodes one time.
 	kubectl exec ubuntu -- curl es:9200       <-- returns ... "cluster_name" : "elasticsearch"...
 	kubectl exec ubuntu -- curl kibana:5601   <-- returns ... var defaultRoute = '/app/kibana'...
 
-### LoadBalancer: access kibana from public IP
+### 2.4 LoadBalancer: access kibana from public IP
 
 Create load-balancer https://github.com/kubernetes/contrib/tree/master/service-loadbalancer
 Give 1 or more nodes the loadbalancer role (so you can balance with public DNS later)
@@ -76,10 +76,10 @@ Give 1 or more nodes the loadbalancer role (so you can balance with public DNS l
     kubectl label node 185.19.30.121 role=loadbalancer
     kubectl create -f service-loadbalancer.yaml
 
-### Access kibana
+### 2.5 Access kibana
 loadbalancer_node_ip:5601
 
-### fluentd (log collecter)
+### 2.6 fluentd (log collecter)
 
 Create fluentd parsing config:
 
@@ -90,12 +90,12 @@ Deploy fluent on all nodes (DaemonSet)
 
     kubectl create -f fluentd.yaml
 
-### See logs in kibana
+### 2.7 See logs in kibana
 
 Check logs coming in kibana, you just need to refresh, select Time-field name : @timestamps + create
 Load and view the dashboard: management > Saved Object > Import > dashboard/elk-v1.json
 
-# Deploy Kubenetes dashboard addon (not elk)
+# 3. Deploy Kubenetes dashboard addon (not elk)
 kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
 Check (carefull dashboard is running in namespace=kube-system )
 
@@ -105,7 +105,7 @@ Loadbalancer should already be forwarding public query to service dashboard. How
 Access it: loadbalancer_node_ip:8888 
 
 
-# Troubleshooting
+# 4. Troubleshooting
 
 If issue connecting to svc for ex elasticsearch:
 - Use: kubectl exec ubuntu -- curl es_internal_service_ip:9200
@@ -137,11 +137,9 @@ Pod can't get created? See more logs:
     kubectl logs -f es-ret5zg
 
 	
-# Need another slave node?
-Edit ansible-cloudstack/k8s.yml and run again the deploy
+# 5. Annexes
 
-
-# Shell Alias for K8s
+### 5.1 Shell Alias for K8s
 ```
 alias k='kubectl'
 alias kk='kubectl get all'
@@ -154,3 +152,9 @@ alias kd='kubectl describe'
 alias kl='kubectl logs'
 
 ```
+
+### 5.2 Need another slave node?
+Edit ansible-cloudstack/k8s.yml and run again the deploy
+
+
+
