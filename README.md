@@ -20,7 +20,7 @@
 ### 1.2 Deploy k8s on Cloudstack infra
 
 I will use the setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
-I just added few lines in file: roles/k8s/templates/k8s-node.j2 to be able to get log with fluentd
+I just added few lines in file: ansible/roles/k8s/templates/k8s-node.j2 to be able to get log with fluentd
 (# In order to have logs in /var/log/containers to be pickup by fluentd
     Environment="RKT_OPTS=--volume dns,kind=host,source=/etc/resolv.conf --mount volume=dns,target=/etc/resolv.conf --volume var-log,kind=host,source=/var/log --mount volume=var-log,target=/var/log" )
 
@@ -46,12 +46,18 @@ Run recipe
 
 # 2. Deploy elk v5 to collect k8s logs
 
-### 2.1 Pre-requisit 
-On all node: Fix an issue with hungry es v5
+### 2.1 Pre-requisit (not needed anymore)
+
+Fix present in roles/k8s/templates/k8s-node.j2 
+
+if needed, manually on all node: fix an issue with hungry es v5
+
     ssh -i ~/.ssh/id_rsa_foobar core@185.19.29.212
     sudo sysctl -w vm.max_map_count=262144
+
 make it persistent:
-	sudo vi /etc/sysctl.d/elasticsearch.conf
+
+    sudo vi /etc/sysctl.d/elasticsearch.conf
     vm.max_map_count=262144
     sudo sysctl --system
 	
@@ -94,15 +100,6 @@ Deploy fluent on all nodes (DaemonSet)
 
 Check logs coming in kibana, you just need to refresh, select Time-field name : @timestamps + create
 Load and view the dashboard: management > Saved Object > Import > dashboard/elk-v1.json
-
-# 3. Deploy Kubenetes dashboard addon (not elk)
-kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
-Check (carefull dashboard is running in namespace=kube-system )
-
-    kubectl get all --all-namespaces
-
-Loadbalancer should already be forwarding public query to service dashboard. However you will probably have to restart lb pod or recreate it
-Access it: loadbalancer_node_ip:8888 
 
 
 # 4. Troubleshooting
@@ -156,5 +153,12 @@ alias kl='kubectl logs'
 ### 5.2 Need another slave node?
 Edit ansible-cloudstack/k8s.yml and run again the deploy
 
+### 5.3 Deploy Kubenetes dashboard addon (not elk)
+kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
+Check (carefull dashboard is running in namespace=kube-system )
 
+    kubectl get all --all-namespaces
+
+Loadbalancer should already be forwarding public query to service dashboard. However you will probably have to restart lb pod or recreate it
+Access it: loadbalancer_node_ip:8888 
 
