@@ -1,4 +1,4 @@
-# Deploy kubernetes via ansible (on cloudstack cloud servers) with elk (container logging) support #
+# Deploy kubernetes via ansible (on cloudstack servers) with logging (efk) & monitoring (prometheus) support #
 
 ## What you will get:
 - 1 master node running : k8s for container orchestration
@@ -131,11 +131,6 @@ Pod can't get created? See more logs:
     kubectl describe po/es
     kubectl logs -f es-ret5zg
 
-Want to start from scrash? Delete the corresponding namespace
-
-    kubectl delete namespace monitoring
-    kubectl delete namespace logging
-
 # 4. Annexes
 
 ### 4.1 Shell Alias for K8s
@@ -155,7 +150,12 @@ alias kl='kubectl logs'
 ### 4.2 Need another slave node?
 Edit ansible-cloudstack/k8s.yml and run again the deploy
 
-### 4.3 Deploy Kubenetes dashboard addon (not elk)
+### 4.3 Want to start from scrash? Delete the corresponding namespace:
+
+    kubectl delete namespace monitoring
+    kubectl delete namespace logging
+
+### 4.4 Deploy Kubenetes dashboard addon (not elk)
 kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
 Check (carefull dashboard is running in namespace=kube-system )
 
