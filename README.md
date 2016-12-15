@@ -90,19 +90,23 @@ If needed Check services with an ubuntu container
 
 
 If issue connecting to svc (for example elasticsearch), use ubuntu container: 
-- first see if ubuntu will be in the same namespace as the service you want to check:
+- First see if ubuntu will be in the same namespace as the service you want to check:
 
-    nano utils/ubuntu.yaml
-    kubectl apply -f utils/ubuntu.yaml            
+```
+nano utils/ubuntu.yaml
+kubectl apply -f utils/ubuntu.yaml
+```
 
-- depending in which namespace ubuntu runs, you can check services with one of these commands:
-     
-    kubectl exec ubuntu -- curl elasticseach:9200   <-- should returns ... "cluster_name" : "elasticsearch"...
-    kubectl exec ubuntu -- curl kibana:5601         <-- should returns ... var defaultRoute = '/app/kibana'...
+- Depending in which namespace ubuntu runs, you can check services with one of these commands:
+
+```
+kubectl exec ubuntu -- curl elasticseach:9200   <-- should returns ... "cluster_name" : "elasticsearch"...
+kubectl exec ubuntu -- curl kibana:5601         <-- should returns ... var defaultRoute = '/app/kibana'...
     
-    kubectl exec ubuntu -- curl elasticsearch.logging.svc.cluster.local:9200         <-- ubuntu in default namespace
-    kubectl exec ubuntu --namespace=logging -- nslookup elasticsearch               <-- ubuntu in logging namespace
-    kubectl exec ubuntu --namespace=logging -- nslookup kubernetes.default.svc.cluster.local     <-- ubuntu in logging namespace
+kubectl exec ubuntu -- curl elasticsearch.logging.svc.cluster.local:9200         <-- ubuntu in default namespace
+kubectl exec ubuntu --namespace=logging -- nslookup elasticsearch               <-- ubuntu in logging namespace
+kubectl exec ubuntu --namespace=logging -- nslookup kubernetes.default.svc.cluster.local     <-- ubuntu in logging namespace
+```
 
 - Check port 9200 on the node running elasticsearch container: ssh -i ~/.ssh/id_rsa_foobar core@185.19.29.212 netstat -plunt
 - Uncomment type: NodePort and nodePort: 39200 if you want to access elasticsearch from any node_ip
