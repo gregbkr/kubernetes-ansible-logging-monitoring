@@ -1,40 +1,44 @@
 # Deploy kubernetes via ansible (on cloudstack servers) with logging (efk) & monitoring (prometheus) support #
 
-![k8s_Infra.jpg](https://github.com/gregbkr/k8s-ansible-elk/raw/master/k8s-infra.JPG)
+![k8s_Infra.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/k8s-infra.JPG)
 
 ## What you will get:
 - 1 master node running : k8s for container orchestration
-- 2(or more) slave nodes : running the actual containers (workers)
-- Elk: we will send all k8s container logs to an elasticsearch DB, via fluentd. 
-- Visualize the logs with kibana and an example dashboard
-- k8s dashboard addon (not elk dashboard), where you can visualize k8s component in a GUI. 
+- 2(or more) minion/slave nodes : running the actual containers (workers)
+- Efk: we will send all k8s container logs to an elasticsearch DB, via fluentd, and visualize dashboards with kibana
+- prometheus will monitoring all this infra, with grafana dashbaord
+- k8s dashboard addon (not efk dashboard), where you can visualize k8s component in a GUI
+- a service-loadbalancer: which is the public gateway to access your internal k8s services (kibana, grafana)
 
 *Prerequisit:*
-- Cloudstack cloud provider (ex: exoscale) | but you can deploy anywhere else with a bit of adaptation in ansible 
-- An ubuntu VM where you will run ansible recipes, and manage k8s with kubeclt
+- Cloudstack cloud provider (ex: exoscale) / but you can deploy anywhere else with a bit of adaptation in ansible. Deploying logging and monitoring stay the same at the moment you have k8s running
+- A vm (ubuntu) with ansible installed, where you will run recipes, and manage k8s with kubeclt
 
 # 1. Deploy kubernetes
 
 ### 1.1 Clone repo
 
-    git clone https://github.com/gregbkr/k8s-ansible-elk.git k8s && cd k8s
+    git clone https://github.com/gregbkr/kubernetes-ansible-logging-monitoring.git k8s && cd k8s
 
-### 1.2 Deploy k8s on Cloudstack infra
+### 1.2 Deploy k8s on a cloudstack infra
 
-I will use the setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
-I just added few lines in file: ansible/roles/k8s/templates/k8s-node.j2 to be able to get logs with fluentd
+I will use the nice setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
+I just added few lines in file: ansible/roles/k8s/templates/k8s-node.j2 to be able to collect logs with fluentd
 (# In order to have logs in /var/log/containers to be pickup by fluentd
     Environment="RKT_OPTS=--volume dns,kind=host,source=/etc/resolv.conf --mount volume=dns,target=/etc/resolv.conf --volume var-log,kind=host,source=/var/log --mount volume=var-log,target=/var/log" )
 
     cd ansible
     nano k8s.yml      <-- edit k8s version, num_node, ssh_key if you want to use your own
 
-Run recipe
+Next step will create firewall rules k8s, master and minion nodes, and install k8s components
+Run recipe:
 
 	ansible-playbook k8s.yml
 	watch kubectl get node    <-- wait for the nodes to be up
 
-### 1.3 install kubectl locally (with same version as server)
+### 1.3 Install kubectl
+
+Please use the same version as server. You will be able to talk and pilot k8s with this tool.
 
     curl -O https://storage.googleapis.com/kubernetes-release/release/v1.4.6/bin/linux/amd64/kubectl
     chmod +x kubectl
@@ -56,15 +60,17 @@ Run recipe
 
 ### 2.2 LoadBalancer: access kibana from public IP
 
-Create load-balancer https://github.com/kubernetes/contrib/tree/master/service-loadbalancer
-Give 1 or more nodes the loadbalancer role (so you can balance with public DNS later)
+Create the load-balancer to be able to connect to kibana from the internet.
+Give 1 or more nodes the loadbalancer role. 
 
     kubectl label node 185.19.30.121 role=loadbalancer
     kubectl apply -f service-loadbalancer.yaml
 
+*These nodes are some kind of DMZ servers where you will balance your public DNS later. We can imagine that only DMZ services (nginx, loadbalancer) could run in here, and these servers will apply a less restrictive firewall rules (open 80, 433, 5601, 3000) than other internal k8s nodes. More info: https://github.com/kubernetes/contrib/tree/master/service-loadbalancer *
+
 ### 2.3 Access kibana
 
-http://loadbalancer_node_ip:5601
+http://lb_node_ip:5601
 
 ### 2.4 See logs in kibana
 
@@ -73,7 +79,7 @@ Check logs coming in kibana, you just need to refresh, select Time-field name : 
 Load and view your first dashboard: management > Saved Object > Import > dashboards/elk-v1.json
 
 
-# 3. Monitoring with prometheus & grafana
+# 3. Monitoring services and containers with prometheus & grafana
 
 ### 3.1 Create monitoring containers
 
@@ -82,10 +88,13 @@ Load and view your first dashboard: management > Saved Object > Import > dashboa
 
 ### 3.2 Create/recreate loadbalancer (see 2.3)
 
+    kubectl delete -f service-loadbalancer.yaml    <-- because we need to discover the newly created service
+    kubectl apply -f service-loadbalancer.yaml
+
 ### 3.3 Access GUIs
 
-- Prometheus:               http://loadbalancer_node_ip:9090
-- Grafana (admin/admin) :   http://loadbalancer_node_ip:3000
+- Prometheus:               http://lb_node_ip:9090
+- Grafana (admin/admin) :   http://lb_node_ip:3000
 
 ### 3.4 Load dashboards
 
@@ -99,7 +108,7 @@ Other good dashboards :
 
 - node exporter: https://grafana.net/dashboards/704 - https://grafana.net/dashboards/22
 
-- deployment: pod metrics: https://grafana.net/dashboards/747 - pod resource: https://grafana.net/dashboards/737
+- deployment: pod metrics: https://grafana.net/dashboards/747 - pod resources: https://grafana.net/dashboards/737
 
 
 # 4 Kubenetes dashboard addon (not logging efk)
@@ -110,7 +119,7 @@ Dashboard addon let you see k8s services and containers via a nice GUI.
     kubectl get all --namespace=kube-system     <-- carefull dashboard is running in namespace=kube-system
 
 Create/recreate loadbalancer (see 2.3)
-Access GUI: http://loadbalancer_node_ip:8888 
+Access GUI: http://lb_node_ip:8888 
 
 
 # 5. Troubleshooting
