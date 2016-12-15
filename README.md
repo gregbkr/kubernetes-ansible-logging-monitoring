@@ -1,5 +1,7 @@
 # Deploy kubernetes via ansible (on cloudstack servers) with logging (efk) & monitoring (prometheus) support #
 
+![k8s_Infra.jpg](https://github.com/gregbkr/k8s-ansible-elk/raw/master/k8s-infra.JPG)
+
 ## What you will get:
 - 1 master node running : k8s for container orchestration
 - 2(or more) slave nodes : running the actual containers (workers)
