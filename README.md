@@ -20,7 +20,7 @@
 ### 1.2 Deploy k8s on Cloudstack infra
 
 I will use the setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
-I just added few lines in file: ansible/roles/k8s/templates/k8s-node.j2 to be able to get log with fluentd
+I just added few lines in file: ansible/roles/k8s/templates/k8s-node.j2 to be able to get logs with fluentd
 (# In order to have logs in /var/log/containers to be pickup by fluentd
     Environment="RKT_OPTS=--volume dns,kind=host,source=/etc/resolv.conf --mount volume=dns,target=/etc/resolv.conf --volume var-log,kind=host,source=/var/log --mount volume=var-log,target=/var/log" )
 
@@ -40,33 +40,18 @@ Run recipe
 
 ### 1.4 Checks:
 	
-	kubectl get all --all-namespaces    <-- should have no errors here
+	kubectl get all --all-namespaces    <-- should have no error here
 	
-# 2. Deploy elk v5 to collect k8s logs
-
-### 2.1 Pre-requisit (not needed anymore)
-
-Fix present in roles/k8s/templates/k8s-node.j2 
-
-if needed, manually on all node: fix an issue with hungry es v5
-
-    ssh -i ~/.ssh/id_rsa_foobar core@185.19.29.212
-    sudo sysctl -w vm.max_map_count=262144
-
-make it persistent:
-
-    sudo vi /etc/sysctl.d/elasticsearch.conf
-    vm.max_map_count=262144
-    sudo sysctl --system
+# 2. Deploy logging (efk) to collect k8s & containers events
 	
-### 2.2 run elasticsearch, kibana, fluentd
+### 2.1 Deploy elasticsearch, fluentd, kibana
 
     cd .. 
     kubectl apply -f logging.yaml
 
-    kubeclt get all       <-- if you see es container restarting, please restart all nodes one time only (setting vm.max_map_count)
+    kubectl get all --all-namespaces      <-- if you see elasticsearch container restarting, please restart all nodes one time only (setting vm.max_map_count, see troubleshooting section)
 
-### 2.3 LoadBalancer: access kibana from public IP
+### 2.2 LoadBalancer: access kibana from public IP
 
 Create load-balancer https://github.com/kubernetes/contrib/tree/master/service-loadbalancer
 Give 1 or more nodes the loadbalancer role (so you can balance with public DNS later)
@@ -74,22 +59,70 @@ Give 1 or more nodes the loadbalancer role (so you can balance with public DNS l
     kubectl label node 185.19.30.121 role=loadbalancer
     kubectl apply -f service-loadbalancer.yaml
 
-### 2.4 Access kibana
-loadbalancer_node_ip:5601
+### 2.3 Access kibana
 
-### 2.5 See logs in kibana
+http://loadbalancer_node_ip:5601
+
+### 2.4 See logs in kibana
 
 Check logs coming in kibana, you just need to refresh, select Time-field name : @timestamps + create
 Load and view the dashboard: management > Saved Object > Import > dashboard/elk-v1.json
 
-# 3. Troubleshooting
-    
+# 3. Monitoring with prometheus & grafana
 
-If needed Check services with an ubuntu container
+### 3.1 Create monitoring containers
 
+    kubectl apply -f logging.yaml
+    kubectl get all --namespace=monitoring
 
+### 3.2 Create/recreate loadbalancer (see 2.3)
 
-If issue connecting to svc (for example elasticsearch), use ubuntu container: 
+### 3.3 Access GUIs
+
+- Prometheus:               http://loadbalancer_node_ip:9090
+- Grafana (admin/admin) :   http://loadbalancer_node_ip:3000
+
+### 3.4 Load dashboards
+
+Grafana GUI > Dashboards > Import
+
+Already loaded:
+- prometheus stats: https://grafana.net/dashboards/2
+- kubernetes cluster : https://grafana.net/dashboards/162
+
+Other good dashboards :
+
+- node exporter: https://grafana.net/dashboards/704 - https://grafana.net/dashboards/22
+
+- deployment: pod metrics: https://grafana.net/dashboards/747 - pod resource: https://grafana.net/dashboards/737
+
+# 3 Kubenetes dashboard addon (not logging efk)
+
+Dashboard addon let you see k8s services and container via a nice GUI.
+
+    kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
+    kubectl get all --namespace=kube-system     <-- carefull dashboard is running in namespace=kube-system
+
+Create/recreate loadbalancer (see 2.3)
+Access GUI: http://loadbalancer_node_ip:8888 
+
+# 4. Troubleshooting
+
+### If problem starting elasticsearch v5: (fix present in roles/k8s/templates/k8s-node.j2)
+- manually on all node: fix an issue with hungry es v5
+```
+ssh -i ~/.ssh/id_rsa_foobar core@185.19.29.212
+sudo sysctl -w vm.max_map_count=262144
+```
+
+- make it persistent:
+```
+sudo vi /etc/sysctl.d/elasticsearch.conf
+vm.max_map_count=262144
+sudo sysctl --system
+```
+
+### If issue connecting to svc (for example elasticsearch), use ubuntu container: 
 - First see if ubuntu will be in the same namespace as the service you want to check:
 
 ```
@@ -114,7 +147,7 @@ kubectl exec ubuntu --namespace=logging -- nslookup kubernetes.default.svc.clust
     kubectl exec ubuntu -- curl es:9200/_search?q=*
     curl node_ip:39200/_search?q=*       <-- if type: NodePort set in es.yaml
 
-No logs coming in kibana:
+### No log coming in kibana:
 - check that there are file in node: ssh -i ~/.ssh/id_rsa_foobar core@185.19.29.212 ls /var/log/containers
 
 Can't connect to k8s-dashboard addon:
@@ -123,21 +156,21 @@ If stuck use type: NodePort and
 - Find the node public port: kubectl describe service kubernetes-dashboard --namespace=kube-system
 - Access it from nodes : http://185.19.30.220:31224/
 
-DNS resolution not working? Svc kube-dns.kube-system should take care of the resolution
+### DNS resolution not working? Svc kube-dns.kube-system should take care of the resolution
 
     kubectl exec ubuntu -- nslookup google.com
     kubectl exec ubuntu -- nslookup kubernetes
     kubectl exec ubuntu -- nslookup kubernetes.default
     kubectl exec ubuntu -- nslookup kubernetes-dashboard.kube-system
 
-Pod can't get created? See more logs:
+### Pod can't get created? See more logs:
 
-    kubectl describe po/es
-    kubectl logs -f es-ret5zg
+    kubectl describe po/elastcisearch
+    kubectl logs -f elasticsearch-ret5zg
 
-# 4. Annexes
+# 5. Annexes
 
-### 4.1 Shell Alias for K8s
+### Shell Alias for K8s
 ```
 alias k='kubectl'
 alias kk='kubectl get all'
@@ -151,20 +184,13 @@ alias kl='kubectl logs'
 
 ```
 
-### 4.2 Need another slave node?
+### Need another slave node?
 Edit ansible-cloudstack/k8s.yml and run again the deploy
 
-### 4.3 Want to start from scrash? Delete the corresponding namespace:
+### Want to start from scrash? 
+
+Delete the corresponding namespace, all related containers/services will be destroyed.
 
     kubectl delete namespace monitoring
     kubectl delete namespace logging
-
-### 4.4 Deploy Kubenetes dashboard addon (not elk)
-kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
-Check (carefull dashboard is running in namespace=kube-system )
-
-    kubectl get all --all-namespaces
-
-Loadbalancer should already be forwarding public query to service dashboard. However you will probably have to restart lb pod or recreate it
-Access it: loadbalancer_node_ip:8888 
 
