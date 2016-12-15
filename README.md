@@ -42,6 +42,7 @@ Run recipe
 	
 	kubectl get all --all-namespaces    <-- should have no error here
 	
+	
 # 2. Deploy logging (efk) to collect k8s & containers events
 	
 ### 2.1 Deploy elasticsearch, fluentd, kibana
@@ -67,6 +68,7 @@ http://loadbalancer_node_ip:5601
 
 Check logs coming in kibana, you just need to refresh, select Time-field name : @timestamps + create
 Load and view the dashboard: management > Saved Object > Import > dashboard/elk-v1.json
+
 
 # 3. Monitoring with prometheus & grafana
 
@@ -96,9 +98,10 @@ Other good dashboards :
 
 - deployment: pod metrics: https://grafana.net/dashboards/747 - pod resource: https://grafana.net/dashboards/737
 
-# 3 Kubenetes dashboard addon (not logging efk)
 
-Dashboard addon let you see k8s services and container via a nice GUI.
+# 4 Kubenetes dashboard addon (not logging efk)
+
+Dashboard addon let you see k8s services and containers via a nice GUI.
 
     kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
     kubectl get all --namespace=kube-system     <-- carefull dashboard is running in namespace=kube-system
@@ -106,7 +109,8 @@ Dashboard addon let you see k8s services and container via a nice GUI.
 Create/recreate loadbalancer (see 2.3)
 Access GUI: http://loadbalancer_node_ip:8888 
 
-# 4. Troubleshooting
+
+# 5. Troubleshooting
 
 ### If problem starting elasticsearch v5: (fix present in roles/k8s/templates/k8s-node.j2)
 - manually on all node: fix an issue with hungry es v5
@@ -168,7 +172,7 @@ If stuck use type: NodePort and
     kubectl describe po/elastcisearch
     kubectl logs -f elasticsearch-ret5zg
 
-# 5. Annexes
+# 6. Annexes
 
 ### Shell Alias for K8s
 ```
