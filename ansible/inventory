@@ -2,9 +2,11 @@
 # localhost ansible_python_interpreter=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 
 [nodes]
-185.19.29.34
-185.19.30.117
-185.19.30.136
+185.19.29.132
+185.19.29.192
+185.19.30.194
+185.19.28.223
+185.19.30.121
 
 [nodes:vars]
 ansible_ssh_user=core
