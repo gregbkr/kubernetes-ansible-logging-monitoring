@@ -67,7 +67,8 @@ http://loadbalancer_node_ip:5601
 ### 2.4 See logs in kibana
 
 Check logs coming in kibana, you just need to refresh, select Time-field name : @timestamps + create
-Load and view the dashboard: management > Saved Object > Import > dashboard/elk-v1.json
+
+Load and view your first dashboard: management > Saved Object > Import > dashboards/elk-v1.json
 
 
 # 3. Monitoring with prometheus & grafana
@@ -171,6 +172,11 @@ If stuck use type: NodePort and
 
     kubectl describe po/elastcisearch
     kubectl logs -f elasticsearch-ret5zg
+
+### Prometheus can't scrape node_exporter
+Possibly firewall issues!
+You need to open firewall internal rules between all nodes port 9100 (endpoint) and 10255 (node)
+
 
 # 6. Annexes
 
