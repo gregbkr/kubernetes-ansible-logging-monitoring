@@ -68,6 +68,8 @@ Give 1 or more nodes the loadbalancer role.
 
 *These nodes are some kind of DMZ servers where you will balance your public DNS later. We can imagine that only DMZ services (nginx, loadbalancer) could run in here, and these servers will apply a less restrictive firewall rules (open 80, 433, 5601, 3000) than other internal k8s nodes. More info: https://github.com/kubernetes/contrib/tree/master/service-loadbalancer *
 
+If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to discover the newly created service.
+
 ### 2.3 Access kibana
 
 http://lb_node_ip:5601
@@ -86,17 +88,14 @@ Load and view your first dashboard: management > Saved Object > Import > dashboa
     kubectl apply -f monitoring.yaml
     kubectl get all --namespace=monitoring
 
-### 3.2 Create/recreate loadbalancer (see 2.3)
-
-    kubectl delete -f service-loadbalancer.yaml    <-- because we need to discover the newly created service
-    kubectl apply -f service-loadbalancer.yaml
-
-### 3.3 Access GUIs
+### 3.2 Access GUIs
 
 - Prometheus:               http://lb_node_ip:9090
 - Grafana (admin/admin) :   http://lb_node_ip:3000
 
-### 3.4 Load dashboards
+(Create/recreate loadbalancer if needed : see 2.3)
+
+### 3.3 Load dashboards
 
 Grafana GUI > Dashboards > Import
 
@@ -118,9 +117,9 @@ Dashboard addon let you see k8s services and containers via a nice GUI.
     kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
     kubectl get all --namespace=kube-system     <-- carefull dashboard is running in namespace=kube-system
 
-Create/recreate loadbalancer (see 2.3)
 Access GUI: http://lb_node_ip:8888 
 
+(Create/recreate loadbalancer if needed: see 2.3)
 
 # 5. Troubleshooting
 
