@@ -83,7 +83,7 @@ Load and view your first dashboard: management > Saved Object > Import > dashboa
 
 ### 3.1 Create monitoring containers
 
-    kubectl apply -f logging.yaml
+    kubectl apply -f monitoring.yaml
     kubectl get all --namespace=monitoring
 
 ### 3.2 Create/recreate loadbalancer (see 2.3)
