@@ -1,10 +1,10 @@
 # Deploy kubernetes via ansible (on cloudstack servers) with logging (efk) & monitoring (prometheus) support #
 
-![k8s_Infra.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/k8s-infra.JPG)
+![k8s_Infra.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-infra.JPG)
 
 ## What you will get:
-- 1 master node running : k8s for container orchestration
-- 2(or more) minion/slave nodes : running the actual containers (workers)
+- 1 master node running : k8s for container orchestration, it will pilot and gives work to the minions
+- 2(or more) minion/slave nodes : running the actual containers and doing the actual work
 - Efk: we will send all k8s container logs to an elasticsearch DB, via fluentd, and visualize dashboards with kibana
 - prometheus will monitoring all this infra, with grafana dashbaord
 - k8s dashboard addon (not efk dashboard), where you can visualize k8s component in a GUI
@@ -13,6 +13,8 @@
 *Prerequisit:*
 - Cloudstack cloud provider (ex: exoscale) / but you can deploy anywhere else with a bit of adaptation in ansible. Deploying logging and monitoring stay the same at the moment you have k8s running
 - A vm (ubuntu) with ansible installed, where you will run recipes, and manage k8s with kubeclt
+
+More info: you can find an overview of that setup on my blog: https://greg.satoshi.tech/
 
 # 1. Deploy kubernetes
 
@@ -38,6 +40,7 @@ Run recipe:
 
 ### 1.3 Install kubectl
 
+Kubeclt is your admin local client to pilot the k8s cluster.
 Please use the same version as server. You will be able to talk and pilot k8s with this tool.
 
     curl -O https://storage.googleapis.com/kubernetes-release/release/v1.4.6/bin/linux/amd64/kubectl
@@ -54,7 +57,7 @@ Please use the same version as server. You will be able to talk and pilot k8s wi
 ### 2.1 Deploy elasticsearch, fluentd, kibana
 
     cd .. 
-    kubectl apply -f logging.yaml
+    kubectl apply -f logging.yaml    <-- all deployment declarations and configurations are here
 
     kubectl get all --all-namespaces      <-- if you see elasticsearch container restarting, please restart all nodes one time only (setting vm.max_map_count, see troubleshooting section)
 
@@ -80,6 +83,7 @@ Check logs coming in kibana, you just need to refresh, select Time-field name : 
 
 Load and view your first dashboard: management > Saved Object > Import > dashboards/elk-v1.json
 
+![k8s-kibana.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-kibana.JPG)
 
 # 3. Monitoring services and containers with prometheus & grafana
 
@@ -96,7 +100,7 @@ Go to status > target : you should see only some green. If you got some "context
 
 Try a query: "node_memmory_active" > Execute > Graph --> you should see 2 lines representing both nodes.
 
-![prometheus.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/pics/raw/master/prometheus.JPG)
+![prometheus.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/prometheus.JPG)
 
 
 
@@ -106,10 +110,12 @@ Login to the interface with login:admin | pass:admin) :   http://lb_node_ip:3000
 Load some preloaded dashbaords: dashboard > home
 
 **Kubernetes pod resources**
+![grafana-k8s-pod-resources1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-k8s-pod-resources1.JPG)
+![grafana-k8s-pod-resources2.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-k8s-pod-resources2.JPG)
 
 
 **Prometheus stats**
-
+![grafana-prometheus-stats.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-prometheus-stats.JPG)
 
 **Load other dashboards**
 
