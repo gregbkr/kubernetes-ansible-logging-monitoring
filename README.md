@@ -1,6 +1,6 @@
 # Deploy kubernetes via ansible (on cloudstack servers) with logging (efk) & monitoring (prometheus) support #
 
-![k8s_Infra.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/k8s-infra.JPG)
+![k8s_Infra.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-infra.JPG)
 
 ## What you will get:
 - 1 master node running : k8s for container orchestration
@@ -96,7 +96,7 @@ Go to status > target : you should see only some green. If you got some "context
 
 Try a query: "node_memmory_active" > Execute > Graph --> you should see 2 lines representing both nodes.
 
-![prometheus.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/pics/raw/master/prometheus.JPG)
+![prometheus.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/prometheus.JPG)
 
 
 
@@ -106,10 +106,12 @@ Login to the interface with login:admin | pass:admin) :   http://lb_node_ip:3000
 Load some preloaded dashbaords: dashboard > home
 
 **Kubernetes pod resources**
+![grafana-k8s-pod-resources1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-k8s-pod-resources1.JPG)
+![grafana-k8s-pod-resources2.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-k8s-pod-resources2.JPG)
 
 
 **Prometheus stats**
-
+![grafana-prometheus-stats.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-prometheus-stats.JPG)
 
 **Load other dashboards**
 
