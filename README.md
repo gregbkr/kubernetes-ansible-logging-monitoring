@@ -80,6 +80,7 @@ Check logs coming in kibana, you just need to refresh, select Time-field name : 
 
 Load and view your first dashboard: management > Saved Object > Import > dashboards/elk-v1.json
 
+![k8s-kibana.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-kibana.JPG)
 
 # 3. Monitoring services and containers with prometheus & grafana
 
