@@ -69,9 +69,17 @@ Give 1 or more nodes the loadbalancer role.
     kubectl label node 185.19.30.121 role=loadbalancer
     kubectl apply -f service-loadbalancer.yaml
 
-*These nodes are some kind of DMZ servers where you will balance your public DNS later. We can imagine that only DMZ services (nginx, loadbalancer) could run in here, and these servers will apply a less restrictive firewall rules (open 80, 433, 5601, 3000) than other internal k8s nodes. More info: https://github.com/kubernetes/contrib/tree/master/service-loadbalancer *
+*If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to discover the newly created service.
+More info: https://github.com/kubernetes/contrib/tree/master/service-loadbalancer*
 
-If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to discover the newly created service.
+**Security considerations**
+
+These lb nodes are some kind of DMZ servers where you could balance later your DNS queries.
+For production environment, I would recommend that only DMZ services (nginx, loadbalancer) could run in here, because these servers will apply some less restrictive firewall rules (ex: open 80, 433, 5601, 3000) than other internal k8s nodes. 
+So I would create a second security group (sg): k8s-dmz with same rules as k8s, and rules between both zone, so k8s services can talk to  k8s and k8s-dmz. Then open 80, 433, 5601, 3000 for k8s-dmz only. Like this, k8s sg still protect more sensitive containers from direct public access/scans.
+
+The same applies for the master node. I would create a new sg for it: k8s-master, so only this group will permit access from kubeclt (port 80, 443).
+
 
 ### 2.3 Access kibana
 
