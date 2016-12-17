@@ -4,7 +4,7 @@
   vars:
     ssh_key: foobar
     k8s_version: 1.4.6
-    k8s_num_nodes: 4
+    k8s_num_nodes: 2
     k8s_security_group_name: k8s
     k8s_node_prefix: k8s
     k8s_username: foobar

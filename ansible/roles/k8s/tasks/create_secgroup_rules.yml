@@ -53,6 +53,24 @@
      protocol: tcp
      user_security_group: "{{ k8s_security_group_name }}"
 
+  - name: prometheus scrape node exporter TCP 9100
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 9100
+     end_port: 9100
+     protocol: tcp
+     user_security_group: "{{ k8s_security_group_name }}"
+
+  - name: prometheus scrape kubernetes-nodes TCP 10255
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 10255
+     end_port: 10255
+     protocol: tcp
+     user_security_group: "{{ k8s_security_group_name }}"
+
 # external access
 
   - name: SSH for k8s
@@ -68,3 +86,31 @@
      security_group: "{{ k8s_security_group_name }}"
      start_port: 443
      end_port: 443
+
+  - name: kibana
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 5601
+     end_port: 5601
+
+  - name: prometheus
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 9090
+     end_port: 9090
+
+  - name: grafana
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 3000
+     end_port: 3000
+
+  - name: k8s dashboard addon
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 8888
+     end_port: 8888
