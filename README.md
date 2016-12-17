@@ -88,14 +88,30 @@ Load and view your first dashboard: management > Saved Object > Import > dashboa
     kubectl apply -f monitoring.yaml
     kubectl get all --namespace=monitoring
 
-### 3.2 Access GUIs
+### 3.2 Prometheus
 
-- Prometheus:               http://lb_node_ip:9090
-- Grafana (admin/admin) :   http://lb_node_ip:3000
+Access the gui: http://lb_node_ip:9090
 
-(Create/recreate loadbalancer if needed : see 2.3)
+Go to status > target : you should see only some green. If you got some "context deadline exceeded" or "getsockopt connection refused", you will have to open firewall rule between the nodes. For exemple in security group k8s, you need to open 9100 and 10255.
 
-### 3.3 Load dashboards
+Try a query: "node_memmory_active" > Execute > Graph --> you should see 2 lines representing both nodes.
+
+![prometheus.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/pics/raw/master/prometheus.JPG)
+
+
+
+### 3.3 Grafana
+
+Login to the interface with login:admin | pass:admin) :   http://lb_node_ip:3000
+Load some preloaded dashbaords: dashboard > home
+
+**Kubernetes pod resources**
+
+
+**Prometheus stats**
+
+
+**Load other dashboards**
 
 Grafana GUI > Dashboards > Import
 
