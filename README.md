@@ -244,3 +244,9 @@ Delete the corresponding namespace, all related containers/services will be dest
     kubectl delete namespace monitoring
     kubectl delete namespace logging
 
+# 7. Future work
+
+- Use different firewalls security group: k8s, k8s-dmz, k8s-master, to be ready for production
+- Replace haproxy with traefik?
+- Use persistent data for Elasticsearch et prometheus
+- Fix prometheus k8s_pod scraping both port 80 and 9102...
