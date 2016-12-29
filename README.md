@@ -61,29 +61,18 @@ Please use the same version as server. You will be able to talk and pilot k8s wi
 
     kubectl get all --all-namespaces      <-- if you see elasticsearch container restarting, please restart all nodes one time only (setting vm.max_map_count, see troubleshooting section)
 
-### 2.2 LoadBalancer: access kibana from public IP
+### 2.2 Access services
 
-Create the load-balancer to be able to connect to kibana from the internet.
-Give 1 or more nodes the loadbalancer role. 
+From here, you should be able to access our services from your laptop:
 
-    kubectl label node 185.19.30.121 role=loadbalancer
-    kubectl apply -f service-loadbalancer.yaml
+kibana: any_minion_node_ip:5601
+ES: any_minion_node_9200
 
-*If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to discover the newly created service.
-More info: https://github.com/kubernetes/contrib/tree/master/service-loadbalancer*
-
-**Security considerations**
-
-These lb nodes are some kind of DMZ servers where you could balance later your DNS queries.
-For production environment, I would recommend that only DMZ services (nginx, loadbalancer) could run in here, because these servers will apply some less restrictive firewall rules (ex: open 80, 433, 5601, 3000) than other internal k8s nodes. 
-So I would create a second security group (sg): k8s-dmz with same rules as k8s, and rules between both zone, so k8s services can talk to  k8s and k8s-dmz. Then open 80, 433, 5601, 3000 for k8s-dmz only. Like this, k8s sg still protect more sensitive containers from direct public access/scans.
-
-The same applies for the master node. I would create a new sg for it: k8s-master, so only this group will permit access from kubeclt (port 80, 443).
+To enable that access, we set Type=NodePort in kibana/elasticsearch-service.yaml, to make it easier to learn at this point.
+Because we want to control how and from where we should be accessing our public services, we will set in the next section a loadbalancer.
 
 
-### 2.3 Access kibana
 
-http://lb_node_ip:5601
 
 ### 2.4 See logs in kibana
 
@@ -92,6 +81,9 @@ Check logs coming in kibana, you just need to refresh, select Time-field name : 
 Load and view your first dashboard: management > Saved Object > Import > dashboards/elk-v1.json
 
 ![k8s-kibana.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-kibana.JPG)
+
+
+
 
 # 3. Monitoring services and containers with prometheus & grafana
 
@@ -150,6 +142,79 @@ Dashboard addon let you see k8s services and containers via a nice GUI.
 Access GUI: http://lb_node_ip:8888 
 
 (Create/recreate loadbalancer if needed: see 2.3)
+
+
+
+# 3. LoadBalancer
+
+If you are on aws or google cloud, these provider we automatically set a loadbalancer matching the *-ingress.yaml configuration. For all other cloud provider and baremetal, you will have to take care of that step. Luckyly, I will present you two types of loadlancer below ;-)
+- service-loadbalancer (static haproxy) https://github.com/kubernetes/contrib/tree/master/service-loadbalancer*
+- traefik (dynamic proxy) https://github.com/containous/traefik
+
+### 3.1 Service-loadbalancer
+
+Create the load-balancer to be able to connect your service from the internet.
+Give 1 or more nodes the loadbalancer role:
+
+    kubectl label node 185.19.30.121 role=loadbalancer
+    kubectl apply -f service-loadbalancer.yaml
+
+*If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to force a delete/create, then the discovery of the newly created service.
+
+**Access services**
+
+kibana (logging): http://lb_node_ip:5601
+
+grafana (monitoring): http://lb_node_ip:3000
+prometheus (moniroting): http://lb_node_ip:3000
+
+grafana2 (monitoring2): http://lb_node_ip:3002
+
+
+### 3.1 Traefik
+
+Any news services exposed wich ingress, will be catch by traefik and made available without restart.
+
+You need to edit the configuration first:
+
+    nano traefik/
+
+
+
+Create the dynamic proxy to be able to connect your service from the internet.
+
+Give 1 or more nodes the loadbalancer role:
+
+    kubectl label node 185.19.30.121 role=loadbalancer
+    kubectl apply -f service-loadbalancer.yaml
+
+*If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to force a delete/create, then the discovery of the newly created service.
+
+**Access services**
+
+kibana (logging): http://lb_node_ip:5601
+
+grafana (monitoring): http://lb_node_ip:3000
+prometheus (moniroting): http://lb_node_ip:3000
+
+grafana2 (monitoring2): http://lb_node_ip:3002
+
+
+
+### 3.3 Security considerations
+
+These lb nodes are some kind of DMZ servers where you could balance later your DNS queries.
+For production environment, I would recommend that only DMZ services (nginx, loadbalancer) could run in here, because these servers will apply some less restrictive firewall rules (ex: open 80, 433, 5601, 3000) than other internal k8s nodes. 
+So I would create a second security group (sg): k8s-dmz with same rules as k8s, and rules between both zone, so k8s services can talk to  k8s and k8s-dmz. Then open 80, 433, 5601, 3000 for k8s-dmz only. Like this, k8s sg still protect more sensitive containers from direct public access/scans.
+
+The same applies for the master node. I would create a new sg for it: k8s-master, so only this group will permit access from kubeclt (port 80, 443).
+
+Then you should remove all NodePort from the services configuration, so no services will be available when scanning minions. Please comment the section "# type: NodePort" for all *-service.yaml
+
+
+
+
+
 
 # 5. Troubleshooting
 
