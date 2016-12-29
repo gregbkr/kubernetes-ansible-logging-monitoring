@@ -131,8 +131,9 @@ Other good dashboards :
 
 - deployment: pod metrics: https://grafana.net/dashboards/747 - pod resources: https://grafana.net/dashboards/737
 
+# 4. Monitoring services and containers with heapster
 
-# 4 Kubenetes dashboard addon (not logging efk)
+# 5. Kubenetes dashboard addon (not logging efk)
 
 Dashboard addon let you see k8s services and containers via a nice GUI.
 
@@ -145,13 +146,13 @@ Access GUI: http://lb_node_ip:8888
 
 
 
-# 3. LoadBalancer
+# 6. LoadBalancers
 
 If you are on aws or google cloud, these provider we automatically set a loadbalancer matching the *-ingress.yaml configuration. For all other cloud provider and baremetal, you will have to take care of that step. Luckyly, I will present you two types of loadlancer below ;-)
 - service-loadbalancer (static haproxy) https://github.com/kubernetes/contrib/tree/master/service-loadbalancer*
 - traefik (dynamic proxy) https://github.com/containous/traefik
 
-### 3.1 Service-loadbalancer
+### 6.1 Service-loadbalancer
 
 Create the load-balancer to be able to connect your service from the internet.
 Give 1 or more nodes the loadbalancer role:
@@ -160,6 +161,7 @@ Give 1 or more nodes the loadbalancer role:
     kubectl apply -f service-loadbalancer.yaml
 
 *If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to force a delete/create, then the discovery of the newly created service.
+Add/remove services? please edit service-loadbalancer.yaml*
 
 **Access services**
 
@@ -171,37 +173,46 @@ prometheus (moniroting): http://lb_node_ip:3000
 grafana2 (monitoring2): http://lb_node_ip:3002
 
 
-### 3.1 Traefik
+### 6.2 Traefik
 
 Any news services exposed wich ingress, will be catch by traefik and made available without restart.
 
-You need to edit the configuration first:
+To experience the full power of traefik, please purchase a domain name (ex: satoshi.tech), and point that record to the node you choose to be the lb. This record will help create the automatic certificate via acme standard.
 
-    nano traefik/
+Then for each services you will use, create a dns:
 
+- kibana.satoshi.tech --> lb_node_ip
+- grafana.satoshi.tech --> lb_node_ip
+- prometheus.satoshi.tech --> lb_node_ip
+- grafana2.satoshi.tech --> lb_node_ip
 
+Based on which name you use to access the lb node, traefik will forward the the right k8s service.
+
+Now you need to edit the configuration:
+
+    nano traefik/traefik-deployment.yaml
+        [acme]   <-- set you data for auto certification
+
+    nano traefik/traefik-service.yaml
+      externalIPs:  <-- set your lb_node_ip
 
 Create the dynamic proxy to be able to connect your service from the internet.
 
-Give 1 or more nodes the loadbalancer role:
-
-    kubectl label node 185.19.30.121 role=loadbalancer
-    kubectl apply -f service-loadbalancer.yaml
-
-*If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to force a delete/create, then the discovery of the newly created service.
+    kubectl apply -f traefik
 
 **Access services**
+Always use login/pass: test/test
+You can use http or https
 
-kibana (logging): http://lb_node_ip:5601
+kibana (logging): http://kibana.satoshi.tech
 
-grafana (monitoring): http://lb_node_ip:3000
-prometheus (moniroting): http://lb_node_ip:3000
+grafana (monitoring): http:grafana.satoshi.tech
+prometheus (moniroting): http://prmetheus.satoshi.tech
 
-grafana2 (monitoring2): http://lb_node_ip:3002
+grafana2 (monitoring2): http://grafana2.satoshi.tech
 
 
-
-### 3.3 Security considerations
+### 6.3 Security considerations
 
 These lb nodes are some kind of DMZ servers where you could balance later your DNS queries.
 For production environment, I would recommend that only DMZ services (nginx, loadbalancer) could run in here, because these servers will apply some less restrictive firewall rules (ex: open 80, 433, 5601, 3000) than other internal k8s nodes. 
@@ -216,7 +227,7 @@ Then you should remove all NodePort from the services configuration, so no servi
 
 
 
-# 5. Troubleshooting
+# 7. Troubleshooting
 
 ### If problem starting elasticsearch v5: (fix present in roles/k8s/templates/k8s-node.j2)
 - manually on all node: fix an issue with hungry es v5
@@ -283,7 +294,7 @@ Possibly firewall issues!
 You need to open firewall internal rules between all nodes port 9100 (endpoint) and 10255 (node)
 
 
-# 6. Annexes
+# 8. Annexes
 
 ### Shell Alias for K8s
 ```
@@ -309,9 +320,9 @@ Delete the corresponding namespace, all related containers/services will be dest
     kubectl delete namespace monitoring
     kubectl delete namespace logging
 
-# 7. Future work
+# 9. Future work
 
 - Use different firewalls security group: k8s, k8s-dmz, k8s-master, to be ready for production
 - Replace haproxy with traefik?
-- Use persistent data for Elasticsearch et prometheus
+- Use persistent data for Elasticsearch and prometheus
 - Fix prometheus k8s_pod scraping both port 80 and 9102...
