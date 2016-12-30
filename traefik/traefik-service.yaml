@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: kube-system
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+    - port: 80
+      name: http
+    - port: 443
+      name: https
+  externalIPs:
+    - 185.19.28.230
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-console
+  namespace: kube-system
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+    - port: 8080
+      name: webui

@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   name: service-loadbalancer
+  namespace: kube-system
   labels:
     app: service-loadbalancer
     version: v1
@@ -47,6 +48,11 @@ spec:
         - containerPort: 3000
           hostPort: 3000
           protocol: TCP
+        # Grafana2
+        - containerPort: 3002
+          hostPort: 3002
+          protocol: TCP
+        resources: {}
         resources: {}
         args:
-        - --tcp-services=kubernetes-dashboard:80,kibana:5601,prometheus:9090,grafana:3000
+        - --tcp-services=kubernetes-dashboard:80,kibana:5601,prometheus:9090,grafana:3000,grafana2:3002

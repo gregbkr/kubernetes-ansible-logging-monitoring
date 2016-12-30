@@ -101,12 +101,19 @@
      start_port: 9090
      end_port: 9090
 
-  - name: grafana
+  - name: grafana (prometheus)
     local_action:
      module: cs_securitygroup_rule
      security_group: "{{ k8s_security_group_name }}"
      start_port: 3000
      end_port: 3000
+
+  - name: grafana2 (heapster)
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 3002
+     end_port: 3002
 
   - name: k8s dashboard addon
     local_action:
