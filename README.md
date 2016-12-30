@@ -152,11 +152,10 @@ You can load Cluster or Pods dashboards. When viewing Pods, type manually "names
 
 Dashboard addon let you see k8s services and containers via a nice GUI.
 
-    kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
+    kubectl apply -f kubernetes-dashboard
     kubectl get all --namespace=kube-system     <-- carefull dashboard is running in namespace=kube-system
     
-    kubectl describe svc/kubernetes-dashboard --namespace=kube-system    <-- Find out the nodePort
-Access GUI: http://any_minion_node_ip:30xxx 
+Access GUI: http://any_minion_node_ip:30999 
 
 
 # 5. LoadBalancers
@@ -182,7 +181,7 @@ Add/remove services? please edit service-loadbalancer.yaml*
 - grafana (monitoring): http://lb_node_ip:3000
 - prometheus (monitoring): http://lb_node_ip:3000
 - grafana2 (monitoring2): http://lb_node_ip:3002
-- kubernetes-dashboard: http://lb_node_ip:8888
+- kubernetes-dashboard: http://lb_node_ip:9999
 
 ### 5.2 Traefik
 
