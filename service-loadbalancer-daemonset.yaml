@@ -1,5 +1,5 @@
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: DaemonSet
 metadata:
   name: service-loadbalancer
   namespace: kube-system
@@ -7,18 +7,12 @@ metadata:
     app: service-loadbalancer
     version: v1
 spec:
-  replicas: 1
-  selector:
-    app: service-loadbalancer
-    version: v1
   template:
     metadata:
       labels:
         app: service-loadbalancer
         version: v1
     spec:
-      nodeSelector:
-        role: loadbalancer
       containers:
       - image: gcr.io/google_containers/servicelb:0.4
         imagePullPolicy: Always
@@ -56,3 +50,5 @@ spec:
         resources: {}
         args:
         - --tcp-services=kibana:5601,prometheus:9090,grafana:3000,grafana2:3002,kubernetes-dashboard:9999
+      nodeSelector:
+        role: loadbalancer
