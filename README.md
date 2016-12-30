@@ -6,9 +6,11 @@
 - 1 master node running : k8s for container orchestration, it will pilot and gives work to the minions
 - 2(or more) minion/slave/worker nodes : running the actual containers and doing the actual work
 - Efk: we will send all k8s container logs to an elasticsearch DB, via fluentd, and visualize dashboards with kibana
-- prometheus will monitoring all this infra, with grafana dashbaord
-- k8s dashboard addon (not efk dashboard), where you can visualize k8s component in a GUI
-- a service-loadbalancer: which is the public gateway to access your internal k8s services (kibana, grafana)
+- Prometheus will monitoring all this infra, with grafana dashbaord
+- Heapster is an alternative for monitoring your k8s cluster
+- K8s dashboard addon (not efk dashboard), where you can visualize k8s component in a GUI
+- Service-loadbalancer (static haproxy): which is the public gateway to access your internal k8s services (kibana, grafana)
+- Dynamic loadbalancer (traefik): an alternative to haproxy, quite powerfull with its dynamic service discovery and auto certification
 
 *Prerequisit:*
 - Cloudstack cloud provider (ex: exoscale) / but you can deploy anywhere else with a bit of adaptation in ansible. Deploying logging and monitoring stay the same at the moment you have k8s running
