@@ -100,9 +100,10 @@ Create monitoring containers
 
 Access the gui: http://any_minion_node_ip:30090
 
-Go to status > target : you should see only some green. If you got some "context deadline exceeded" or "getsockopt connection refused", you will have to open firewall rule between the nodes. For exemple in security group k8s, you need to open 9100 and 10255.
+Go to status > target : you should see only some green. 
+*If you got some "context deadline exceeded" or "getsockopt connection refused", you will have to open firewall rule between the nodes. For exemple in security group k8s, you need to open 9100 and 10255.*
 
-Try a query: "node_memmory_active" > Execute > Graph --> you should see 2 lines representing both nodes.
+Try a query: "node_memory_Active" > Execute > Graph --> you should see 2 lines representing both nodes.
 
 ![prometheus.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/prometheus.JPG)
 
