@@ -101,7 +101,8 @@ Create monitoring containers
 Access the gui: http://any_minion_node_ip:30090
 
 Go to status > target : you should see only some green. 
-*If you got some "context deadline exceeded" or "getsockopt connection refused", you will have to open firewall rule between the nodes. For exemple in security group k8s, you need to open 9100 and 10255.*
+*We got one false positive error scaping k8s-node with 2 ports 9102 and 80. As long as 9102 is good, we got the data.
+If you got some "context deadline exceeded" or "getsockopt connection refused", you will have to open firewall rule between the nodes. For exemple in security group k8s, you need to open 9100 and 10255.*
 
 Try a query: "node_memory_Active" > Execute > Graph --> you should see 2 lines representing both nodes.
 
