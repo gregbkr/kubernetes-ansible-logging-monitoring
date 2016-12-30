@@ -4,7 +4,7 @@
 
 ## What you will get:
 - 1 master node running : k8s for container orchestration, it will pilot and gives work to the minions
-- 2(or more) minion/slave nodes : running the actual containers and doing the actual work
+- 2(or more) minion/slave/worker nodes : running the actual containers and doing the actual work
 - Efk: we will send all k8s container logs to an elasticsearch DB, via fluentd, and visualize dashboards with kibana
 - prometheus will monitoring all this infra, with grafana dashbaord
 - k8s dashboard addon (not efk dashboard), where you can visualize k8s component in a GUI
@@ -57,24 +57,21 @@ Please use the same version as server. You will be able to talk and pilot k8s wi
 ### 2.1 Deploy elasticsearch, fluentd, kibana
 
     cd .. 
-    kubectl apply -f logging.yaml    <-- all deployment declarations and configurations are here
+    kubectl apply -f logging    <-- all deployment declarations and configurations are here
 
     kubectl get all --all-namespaces      <-- if you see elasticsearch container restarting, please restart all nodes one time only (setting vm.max_map_count, see troubleshooting section)
 
 ### 2.2 Access services
 
-From here, you should be able to access our services from your laptop:
+From here, you should be able to access our services from your laptop, as long as your cloud server ip are public:
 
-kibana: any_minion_node_ip:5601
-ES: any_minion_node_9200
+- kibana: http://any_minion_node_ip:35601
+- ES: http://any_minion_node_ip:39200
 
-To enable that access, we set Type=NodePort in kibana/elasticsearch-service.yaml, to make it easier to learn at this point.
-Because we want to control how and from where we should be accessing our public services, we will set in the next section a loadbalancer.
+To enable that access, we had set Type=NodePort and nodePort:35601/39200 in kibana/elasticsearch-service.yaml, to make it easier to learn at this point.
+Because we want to control how and from where we should be accessing our public services, we will set in a later section a loadbalancer.
 
-
-
-
-### 2.4 See logs in kibana
+### 2.3 See logs in kibana
 
 Check logs coming in kibana, you just need to refresh, select Time-field name : @timestamps + create
 
@@ -83,18 +80,25 @@ Load and view your first dashboard: management > Saved Object > Import > dashboa
 ![k8s-kibana.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-kibana.JPG)
 
 
+# 3. Monitoring services and containers
 
+It seems like two schools are gently fighting for container monitoring:
 
-# 3. Monitoring services and containers with prometheus & grafana
+- Heapster: this new player now comes as a kind of k8s addon (you can deploy it via a simple switch in some setup). It seems to be better integrated at the moment, and even more in the future with k8s component depending on it, but still young and few features
+- Prometheus: it has been around for some times, lots of nice features (alerting, application metrics) and community resources available (see the public dashboards for example)
 
-### 3.1 Create monitoring containers
+More on which one to choose: https://github.com/kubernetes/heapster/issues/645
 
-    kubectl apply -f monitoring.yaml
+### 3.1 Monitoring with prometheus
+
+Create monitoring containers
+
+    kubectl apply -f monitoring
     kubectl get all --namespace=monitoring
 
-### 3.2 Prometheus
+**Prometheus**
 
-Access the gui: http://lb_node_ip:9090
+Access the gui: http://any_minion_node_ip:39090
 
 Go to status > target : you should see only some green. If you got some "context deadline exceeded" or "getsockopt connection refused", you will have to open firewall rule between the nodes. For exemple in security group k8s, you need to open 9100 and 10255.
 
@@ -104,10 +108,10 @@ Try a query: "node_memmory_active" > Execute > Graph --> you should see 2 lines 
 
 
 
-### 3.3 Grafana
+**Grafana**
 
-Login to the interface with login:admin | pass:admin) :   http://lb_node_ip:3000
-Load some preloaded dashbaords: dashboard > home
+Login to the interface with login:admin | pass:admin) :   http://any_minion_node_ip:33000
+Load some dashboards: dashboard > home
 
 **Kubernetes pod resources**
 ![grafana-k8s-pod-resources1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-k8s-pod-resources1.JPG)
@@ -117,7 +121,7 @@ Load some preloaded dashbaords: dashboard > home
 **Prometheus stats**
 ![grafana-prometheus-stats.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana-prometheus-stats.JPG)
 
-**Load other dashboards**
+**Load other public dashboards**
 
 Grafana GUI > Dashboards > Import
 
@@ -131,9 +135,19 @@ Other good dashboards :
 
 - deployment: pod metrics: https://grafana.net/dashboards/747 - pod resources: https://grafana.net/dashboards/737
 
-# 4. Monitoring services and containers with heapster
+### 3.2 Monitoring2 with heapster
 
-# 5. Kubenetes dashboard addon (not logging efk)
+    kubectl apply -f monitoring2
+    kubectl get all --namespace=monitoring2
+
+** Access services**
+
+- Grafana2: http://any_minion_node_ip:33002
+- Influxdb: http://any_minion_node_ip:38086
+
+You can load Cluster or Pods dashboards. When viewing Pods, type manually "namespace=monitoring2" to view stats for the related containers.
+
+# 4. Kubenetes dashboard addon (not logging efk)
 
 Dashboard addon let you see k8s services and containers via a nice GUI.
 
@@ -146,13 +160,13 @@ Access GUI: http://lb_node_ip:8888
 
 
 
-# 6. LoadBalancers
+# 5. LoadBalancers
 
 If you are on aws or google cloud, these provider we automatically set a loadbalancer matching the *-ingress.yaml configuration. For all other cloud provider and baremetal, you will have to take care of that step. Luckyly, I will present you two types of loadlancer below ;-)
 - service-loadbalancer (static haproxy) https://github.com/kubernetes/contrib/tree/master/service-loadbalancer*
 - traefik (dynamic proxy) https://github.com/containous/traefik
 
-### 6.1 Service-loadbalancer
+### 5.1 Service-loadbalancer
 
 Create the load-balancer to be able to connect your service from the internet.
 Give 1 or more nodes the loadbalancer role:
@@ -173,11 +187,13 @@ prometheus (moniroting): http://lb_node_ip:3000
 grafana2 (monitoring2): http://lb_node_ip:3002
 
 
-### 6.2 Traefik
+### 5.2 Traefik
 
-Any news services exposed wich ingress, will be catch by traefik and made available without restart.
+Any news services, exposed by *-ingress.yaml, will be caught by traefik and made available without restart.
 
-To experience the full power of traefik, please purchase a domain name (ex: satoshi.tech), and point that record to the node you choose to be the lb. This record will help create the automatic certificate via acme standard.
+To experience the full power of traefik, please purchase a domain name (ex: satoshi.tech), and point that record to the node you choose to be the lb. This record will help create the automatic certificate via the acme standard.
+
+- satoshi.tech --> lb_node_ip
 
 Then for each services you will use, create a dns:
 
@@ -186,7 +202,7 @@ Then for each services you will use, create a dns:
 - prometheus.satoshi.tech --> lb_node_ip
 - grafana2.satoshi.tech --> lb_node_ip
 
-Based on which name you use to access the lb node, traefik will forward the the right k8s service.
+Based on which name you use to access the lb_node, traefik will forward to the right k8s service.
 
 Now you need to edit the configuration:
 
@@ -207,27 +223,24 @@ You can use http or https
 kibana (logging): http://kibana.satoshi.tech
 
 grafana (monitoring): http:grafana.satoshi.tech
-prometheus (moniroting): http://prmetheus.satoshi.tech
+prometheus (monitoring): http://prmetheus.satoshi.tech
 
 grafana2 (monitoring2): http://grafana2.satoshi.tech
 
 
-### 6.3 Security considerations
+### 5.3 Security considerations
 
 These lb nodes are some kind of DMZ servers where you could balance later your DNS queries.
-For production environment, I would recommend that only DMZ services (nginx, loadbalancer) could run in here, because these servers will apply some less restrictive firewall rules (ex: open 80, 433, 5601, 3000) than other internal k8s nodes. 
+For production environment, I would recommend that only DMZ services (service-loadbalancer, traefik, nginx, ...) could run in here, because these servers will apply some less restrictive firewall rules (ex: open 80, 433, 5601, 3000) than other minion k8s nodes. 
 So I would create a second security group (sg): k8s-dmz with same rules as k8s, and rules between both zone, so k8s services can talk to  k8s and k8s-dmz. Then open 80, 433, 5601, 3000 for k8s-dmz only. Like this, k8s sg still protect more sensitive containers from direct public access/scans.
 
 The same applies for the master node. I would create a new sg for it: k8s-master, so only this group will permit access from kubeclt (port 80, 443).
 
-Then you should remove all NodePort from the services configuration, so no services will be available when scanning minions. Please comment the section "# type: NodePort" for all *-service.yaml
+Then you should remove all NodePort from the services configuration, so no service will be available when scanning a classic minion. For that please comment the section "# type: NodePort" for all *-service.yaml
 
 
 
-
-
-
-# 7. Troubleshooting
+# 6. Troubleshooting
 
 ### If problem starting elasticsearch v5: (fix present in roles/k8s/templates/k8s-node.j2)
 - manually on all node: fix an issue with hungry es v5
@@ -294,7 +307,7 @@ Possibly firewall issues!
 You need to open firewall internal rules between all nodes port 9100 (endpoint) and 10255 (node)
 
 
-# 8. Annexes
+# 7. Annexes
 
 ### Shell Alias for K8s
 ```
@@ -320,7 +333,7 @@ Delete the corresponding namespace, all related containers/services will be dest
     kubectl delete namespace monitoring
     kubectl delete namespace logging
 
-# 9. Future work
+# 8. Future work
 
 - Use different firewalls security group: k8s, k8s-dmz, k8s-master, to be ready for production
 - Replace haproxy with traefik?
