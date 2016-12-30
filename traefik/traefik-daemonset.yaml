@@ -31,23 +31,20 @@ data:
     main = "satoshi.tech"
 ---
 apiVersion: extensions/v1beta1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: traefik-ingress-controller
   namespace: kube-system
   labels:
     k8s-app: traefik-ingress-lb
+    #kubernetes.io/cluster-service: "true"
 spec:
-  replicas: 1
-  revisionHistoryLimit: 0
   template:
     metadata:
       labels:
         k8s-app: traefik-ingress-lb
         name: traefik-ingress-lb
     spec:
-      nodeSelector:
-        role: minion
       terminationGracePeriodSeconds: 60
       volumes:
         - name: config
@@ -57,7 +54,7 @@ spec:
           hostPath:
             path: /srv/configs/acme
       containers:
-        - image: containous/traefik:experimental
+        - image: containous/traefik
           name: traefik-ingress-lb
           imagePullPolicy: Always
           volumeMounts:
@@ -76,3 +73,5 @@ spec:
             - --web
             - --kubernetes
             #- --logLevel=DEBUG
+      nodeSelector:
+        role: loadbalancer
