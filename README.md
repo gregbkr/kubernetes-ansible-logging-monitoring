@@ -223,6 +223,7 @@ You can use http or https
 - prometheus (monitoring): http://prometheus.satoshi.tech
 - grafana2 (monitoring2): http://grafana2.satoshi.tech
 - kubernetes-dashboard: http://kubernetes-dashboard.satoshi.tech
+- traefik-console: http://traefik-console.satoshi.tech or http://any_minion_node_ip:30080
 
 ### 5.3 Security considerations
 
