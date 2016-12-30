@@ -65,8 +65,8 @@ Please use the same version as server. You will be able to talk and pilot k8s wi
 
 From here, you should be able to access our services from your laptop, as long as your cloud server ip are public:
 
-- kibana: http://any_minion_node_ip:35601
-- ES: http://any_minion_node_ip:39200
+- kibana: http://any_minion_node_ip:30601
+- ES: http://any_minion_node_ip:30200
 
 To enable that access, we had set Type=NodePort and nodePort:35601/39200 in kibana/elasticsearch-service.yaml, to make it easier to learn at this point.
 Because we want to control how and from where we should be accessing our public services, we will set in a later section a loadbalancer.
@@ -98,7 +98,7 @@ Create monitoring containers
 
 **Prometheus**
 
-Access the gui: http://any_minion_node_ip:39090
+Access the gui: http://any_minion_node_ip:30090
 
 Go to status > target : you should see only some green. If you got some "context deadline exceeded" or "getsockopt connection refused", you will have to open firewall rule between the nodes. For exemple in security group k8s, you need to open 9100 and 10255.
 
@@ -110,7 +110,7 @@ Try a query: "node_memmory_active" > Execute > Graph --> you should see 2 lines 
 
 **Grafana**
 
-Login to the interface with login:admin | pass:admin) :   http://any_minion_node_ip:33000
+Login to the interface with login:admin | pass:admin) :   http://any_minion_node_ip:30000
 Load some dashboards: dashboard > home
 
 **Kubernetes pod resources**
@@ -142,8 +142,8 @@ Other good dashboards :
 
 ** Access services**
 
-- Grafana2: http://any_minion_node_ip:33002
-- Influxdb: http://any_minion_node_ip:38086
+- Grafana2: http://any_minion_node_ip:30002
+- Influxdb: http://any_minion_node_ip:30086
 
 You can load Cluster or Pods dashboards. When viewing Pods, type manually "namespace=monitoring2" to view stats for the related containers.
 
@@ -154,10 +154,7 @@ Dashboard addon let you see k8s services and containers via a nice GUI.
     kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
     kubectl get all --namespace=kube-system     <-- carefull dashboard is running in namespace=kube-system
 
-Access GUI: http://lb_node_ip:8888 
-
-(Create/recreate loadbalancer if needed: see 2.3)
-
+Access GUI: http://any_minion_node_ip:30888 
 
 
 # 5. LoadBalancers
