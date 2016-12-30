@@ -174,7 +174,7 @@ Create the load-balancer to be able to connect your service from the internet.
 Give 1 or more nodes the loadbalancer role:
 
     kubectl label node 185.19.30.121 role=loadbalancer
-    kubectl apply -f service-loadbalancer.yaml
+    kubectl apply -f service-loadbalancer-daemonset.yaml
 
 *If you change the config, use "kubectl delete -f service-loadbalancer.yaml" to force a delete/create, then the discovery of the newly created service.
 Add/remove services? please edit service-loadbalancer.yaml*
@@ -241,9 +241,9 @@ Then you should remove all NodePort from the services configuration, so no servi
 
 ### 5.4 Scaling loadbalancers
 
-Add more loadbalancers, by adding more loadbalancers nodes
+Add more loadbalancers, by adding more loadbalancers nodes. Because we use Daemonset type of job, all new nodes tagged with loadbalancer will spawn a loadbalancer container.
 
-**Use ansible to add a node**
+Use ansible to add a node
 
     nano ansible/k8s.yml     <-- edit:  k8s_num_nodes: 3
     ansible-playbook ansible/k8s.yml
@@ -253,19 +253,12 @@ Label it as a loadbalancer node
 
     kubectl label node your_new_lb_minion_node role=loadbalancer
 
-**Scale up pods service-loadbalancer**
+Then just check the new containers getting created 
+    kubectl get all --all-namespaces
 
-    kubectl scale rc service-loadbalancer --replicas 2 --namespace=kube-system
-    kubectl get rc --all-namespaces
+For service-loadbalancer, try to access new_lb_minion_ip:5601
 
-and try to access to new_lb_minion_ip:5601
-
-**Scale up pods traefik**
-
-    kubectl scale deployment traefik-ingress-controller --replicas 2 --namespace=kube-system
-    kubectl get deploy --all-namespaces
-
-Add dns A record kibana.satoshi.tech --> new_lb_minion_ip so we will balance dns resolution to the old and new lb node
+For trafik, add a dns A-record kibana.satoshi.tech --> new_lb_minion_ip so we will balance dns resolution to the old and new lb_node.
 Test some ping, and access kibana.satoshi.tech few times...	
 
 
