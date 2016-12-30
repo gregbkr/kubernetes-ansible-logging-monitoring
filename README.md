@@ -196,6 +196,7 @@ Then for each services you will use, create a dns A record:
 - prometheus.satoshi.tech --> lb_node_ip
 - grafana2.satoshi.tech --> lb_node_ip
 - kubernetes-dashboard.satoshi.tech --> lb_node_ip
+- traefik-console.satoshi.tech --> lb_node_ip
 
 Based on which name you use to access the lb_node, traefik will forward to the right k8s service.
 
@@ -222,6 +223,8 @@ You can use http or https
 - grafana2 (monitoring2): http://grafana2.satoshi.tech
 - kubernetes-dashboard: http://kubernetes-dashboard.satoshi.tech
 - traefik-console: http://traefik-console.satoshi.tech or http://any_minion_node_ip:30080
+
+![traefik.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/traefik.JPG)
 
 ### 5.3 Security considerations
 
