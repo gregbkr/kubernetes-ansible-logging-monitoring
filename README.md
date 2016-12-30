@@ -1,6 +1,6 @@
 # Deploy kubernetes via ansible (on cloudstack servers) with logging (efk) & monitoring (prometheus) support #
 
-![k8s_Infra.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-infra.JPG)
+![k8s_Infra1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-infra1.JPG)
 
 ## What you will get:
 - 1 master node running : k8s for container orchestration, it will pilot and gives work to the minions
