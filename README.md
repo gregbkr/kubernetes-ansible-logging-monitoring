@@ -146,6 +146,11 @@ Other good dashboards :
 
 You can load Cluster or Pods dashboards. When viewing Pods, type manually "namespace=monitoring2" to view stats for the related containers.
 
+![grafana2-pods.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana2-pods.JPG)
+![grafana2-cluster1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana2-cluster1.JPG)
+![grafana2-cluster1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana2-cluster2.JPG)
+![grafana2-cluster1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/grafana2-cluster3.JPG)
+
 # 4. Kubenetes dashboard addon (not logging efk)
 
 Dashboard addon let you see k8s services and containers via a nice GUI.
@@ -155,6 +160,7 @@ Dashboard addon let you see k8s services and containers via a nice GUI.
     
 Access GUI: http://any_minion_node_ip:30999 
 
+![kubernetes-dashboard.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/kubernetes-dashboard-addon.JPG)
 
 # 5. LoadBalancers
 
