@@ -208,15 +208,12 @@ Based on which name you use to access the lb_node, traefik will forward to the r
 
 Now you need to edit the configuration:
 
-    nano traefik/traefik-deployment.yaml
+    nano traefik/traefik-daemonset.yaml
         [acme]   <-- set you data for auto certification
-
-    nano traefik/traefik-service.yaml
-      externalIPs:  <-- set your lb_node_ip
 
 Create the dynamic proxy to be able to connect your service from the internet.
 
-    kubectl apply -f traefik
+    kubectl apply -f traefik    <-- if error, probably because you didn't deploy other namespaces, so can ignore
     kubectl get all --all-namespaces  <-- if traefik pod can't get created, probably issue with port 443 on loadbalancer --> see troubleshooting section
 
 **Access services**
