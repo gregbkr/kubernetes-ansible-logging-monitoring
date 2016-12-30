@@ -10,11 +10,9 @@ metadata:
   name: influxdb-svc
   namespace: monitoring2
 spec:
-  type: NodePort
   ports:
   - name: api
     port: 8086
     targetPort: 8086
-    nodePort: 38086
   selector:
     k8s-app: influxdb

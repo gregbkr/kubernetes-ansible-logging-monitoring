@@ -32,10 +32,6 @@ spec:
         name: haproxy
         ports:
         ## All http services
-        # kubernetes-dashboard-addon
-        - containerPort: 80
-          hostPort: 8888
-          protocol: TCP
         # kibana
         - containerPort: 5601
           hostPort: 5601
@@ -52,7 +48,11 @@ spec:
         - containerPort: 3002
           hostPort: 3002
           protocol: TCP
+        # kubernetes-dashboard-addon
+        - containerPort: 9999
+          hostPort: 9999
+          protocol: TCP
         resources: {}
         resources: {}
         args:
-        - --tcp-services=kubernetes-dashboard:80,kibana:5601,prometheus:9090,grafana:3000,grafana2:3002
+        - --tcp-services=kibana:5601,prometheus:9090,grafana:3000,grafana2:3002,kubernetes-dashboard:9999

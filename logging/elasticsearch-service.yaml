@@ -12,8 +12,8 @@ spec:
   - name: http
     port: 9200
     protocol: TCP
-    nodePort: 39200
+    nodePort: 30200
   - name: transport
     port: 9300
     protocol: TCP
-    nodePort: 39300
+    nodePort: 30300

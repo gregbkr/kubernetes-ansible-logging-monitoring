@@ -119,5 +119,19 @@
     local_action:
      module: cs_securitygroup_rule
      security_group: "{{ k8s_security_group_name }}"
-     start_port: 8888
-     end_port: 8888
+     start_port: 9999
+     end_port: 9999
+
+  - name: nodePort random service range
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 30000
+     end_port: 33000
+
+  - name: traefik gui
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 8080
+     end_port: 8080

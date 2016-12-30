@@ -13,7 +13,7 @@ spec:
   type: NodePort
   ports:
     - port: 9090
-      nodePort: 39090
+      nodePort: 30090
       protocol: TCP
       name: webui
   selector:

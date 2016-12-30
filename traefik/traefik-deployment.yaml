@@ -12,11 +12,11 @@ data:
       [entryPoints.http]
       address = ":80"
       #[entryPoints.http.redirect]
-      entryPoint = "https"
-      [entryPoints.http.auth.basic]
-      users = ["test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"]
-      [entryPoints.https.auth.basic]
-      users = ["test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"]
+      #entryPoint = "https"
+      #[entryPoints.http.auth.basic]   # if you need login/pass to access service
+      #users = ["test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"]   # user=test, pass=test
+      #[entryPoints.https.auth.basic]
+      #users = ["test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"]   # user=test, pass=test
       [entryPoints.https]
       address = ":443"
       [entryPoints.https.tls]
@@ -46,6 +46,8 @@ spec:
         k8s-app: traefik-ingress-lb
         name: traefik-ingress-lb
     spec:
+      nodeSelector:
+        role: minion
       terminationGracePeriodSeconds: 60
       volumes:
         - name: config
@@ -73,4 +75,4 @@ spec:
             - --configfile=/config/traefik.toml
             - --web
             - --kubernetes
-            - --logLevel=DEBUG
+            #- --logLevel=DEBUG

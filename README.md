@@ -31,13 +31,12 @@ I just added few lines in file: ansible/roles/k8s/templates/k8s-node.j2 to be ab
 (# In order to have logs in /var/log/containers to be pickup by fluentd
     Environment="RKT_OPTS=--volume dns,kind=host,source=/etc/resolv.conf --mount volume=dns,target=/etc/resolv.conf --volume var-log,kind=host,source=/var/log --mount volume=var-log,target=/var/log" )
 
-    cd ansible
-    nano k8s.yml      <-- edit k8s version, num_node, ssh_key if you want to use your own
+    nano ansible/k8s.yml      <-- edit k8s version, num_node, ssh_key if you want to use your own
 
 Next step will create firewall rules k8s, master and minion nodes, and install k8s components
 Run recipe:
 
-	ansible-playbook k8s.yml
+	ansible-playbook ansible/k8s.yml
 	watch kubectl get node    <-- wait for the nodes to be up
 
 ### 1.3 Install kubectl
@@ -58,7 +57,6 @@ Please use the same version as server. You will be able to talk and pilot k8s wi
 	
 ### 2.1 Deploy elasticsearch, fluentd, kibana
 
-    cd .. 
     kubectl apply -f logging    <-- all deployment declarations and configurations are here
 
     kubectl get all --all-namespaces      <-- if you see elasticsearch container restarting, please restart all nodes one time only (setting vm.max_map_count, see troubleshooting section)
@@ -235,6 +233,34 @@ The same applies for the master node. I would create a new sg for it: k8s-master
 
 Then you should remove all NodePort from the services configuration, so no service will be available when scanning a classic minion. For that please comment the section "# type: NodePort" for all *-service.yaml
 
+### 5.4 Scaling loadbalancers
+
+Add more loadbalancers, by adding more loadbalancers nodes
+
+**Use ansible to add a node**
+
+    nano ansible/k8s.yml     <-- edit:  k8s_num_nodes: 3
+    ansible-playbook ansible/k8s.yml
+    kubeclt get node         <-- wait for it!
+	
+Label it as a loadbalancer node
+
+    kubectl label node your_new_lb_minion_node role=loadbalancer
+
+**Scale up pods service-loadbalancer**
+
+    kubectl scale rc service-loadbalancer --replicas 2 --namespace=kube-system
+    kubectl get rc --all-namespaces
+
+and try to access to new_lb_minion_ip:5601
+
+**Scale up pods traefik**
+
+    kubectl scale deployment traefik-ingress-controller --replicas 2 --namespace=kube-system
+    kubectl get deploy --all-namespaces
+
+Add dns A record kibana.satoshi.tech --> new_lb_minion_ip so we will balance dns resolution to the old and new lb node
+Test some ping, and access kibana.satoshi.tech few times...	
 
 
 # 6. Troubleshooting
