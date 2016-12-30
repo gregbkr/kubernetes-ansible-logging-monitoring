@@ -75,7 +75,7 @@ Because we want to control how and from where we should be accessing our public 
 
 Check logs coming in kibana, you just need to refresh, select Time-field name : @timestamps + create
 
-Load and view your first dashboard: management > Saved Object > Import > dashboards/elk-v1.json
+Load and view your first dashboard: management > Saved Object > Import > logging/dashboards/elk-v1.json
 
 ![k8s-kibana.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-kibana.JPG)
 
