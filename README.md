@@ -212,6 +212,7 @@ Now you need to edit the configuration:
 Create the dynamic proxy to be able to connect your service from the internet.
 
     kubectl apply -f traefik
+    kubectl get all --all-namespaces  <-- if traefik pod can't get created, probably issue with port 443 on loadbalancer --> see troubleshooting section
 
 **Access services**
 Always use login/pass: test/test
@@ -304,6 +305,15 @@ You need to open firewall internal rules between all nodes port 9100 (endpoint) 
 ### Check influxdb
 
     kubectl exec ubuntu --namespace=monitoring2 -- curl -sl -I influxdb:8086/ping
+
+### Traefik pod cant get created: port 443 already used
+
+Not very sure yet what the issue on lb_node, but try to start traefik on another minion:
+
+    kubectl label node 185.19.29.192 role=minion    <-- give another node the minion role
+    nano traefik/traefik-deployment.yaml   <-- and edit section    spec > nodeSelector: > role: minion
+
+Then delete and recreate traefik, should be all good.
 
 ### Check traefik protected access
 
