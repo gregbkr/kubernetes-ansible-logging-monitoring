@@ -161,7 +161,7 @@ Access GUI: http://any_minion_node_ip:30999
 # 5. LoadBalancers
 
 If you are on aws or google cloud, these provider we automatically set a loadbalancer matching the *-ingress.yaml configuration. For all other cloud provider and baremetal, you will have to take care of that step. Luckyly, I will present you two types of loadlancer below ;-)
-- service-loadbalancer (static haproxy) https://github.com/kubernetes/contrib/tree/master/service-loadbalancer*
+- service-loadbalancer (static haproxy) https://github.com/kubernetes/contrib/tree/master/service-loadbalancer
 - traefik (dynamic proxy) https://github.com/containous/traefik
 
 ### 5.1 Service-loadbalancer
