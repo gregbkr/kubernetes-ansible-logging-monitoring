@@ -143,7 +143,6 @@ Other good dashboards :
 ** Access services**
 
 - Grafana2: http://any_minion_node_ip:30002
-- Influxdb: http://any_minion_node_ip:30086
 
 You can load Cluster or Pods dashboards. When viewing Pods, type manually "namespace=monitoring2" to view stats for the related containers.
 
@@ -303,6 +302,14 @@ If stuck use type: NodePort and
 Possibly firewall issues!
 You need to open firewall internal rules between all nodes port 9100 (endpoint) and 10255 (node)
 
+### Check influxdb
+
+    kubectl exec ubuntu --namespace=monitoring2 -- curl -sl -I influxdb:8086/ping
+
+### Check traefik protected access
+
+    apt install httpie
+    http --verify=no --auth test:test https://kibana.satoshi.tech -v
 
 # 7. Annexes
 
