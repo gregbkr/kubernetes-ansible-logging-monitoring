@@ -176,13 +176,11 @@ Add/remove services? please edit service-loadbalancer.yaml*
 
 **Access services**
 
-kibana (logging): http://lb_node_ip:5601
-
-grafana (monitoring): http://lb_node_ip:3000
-prometheus (moniroting): http://lb_node_ip:3000
-
-grafana2 (monitoring2): http://lb_node_ip:3002
-
+- kibana (logging): http://lb_node_ip:5601
+- grafana (monitoring): http://lb_node_ip:3000
+- prometheus (monitoring): http://lb_node_ip:3000
+- grafana2 (monitoring2): http://lb_node_ip:3002
+- kubernetes-dashboard: http://lb_node_ip:8888
 
 ### 5.2 Traefik
 
@@ -198,6 +196,7 @@ Then for each services you will use, create a dns:
 - grafana.satoshi.tech --> lb_node_ip
 - prometheus.satoshi.tech --> lb_node_ip
 - grafana2.satoshi.tech --> lb_node_ip
+- kubernetes-dashboard.satoshi.tech --> lb_node_ip
 
 Based on which name you use to access the lb_node, traefik will forward to the right k8s service.
 
@@ -217,13 +216,11 @@ Create the dynamic proxy to be able to connect your service from the internet.
 Always use login/pass: test/test
 You can use http or https
 
-kibana (logging): http://kibana.satoshi.tech
-
-grafana (monitoring): http:grafana.satoshi.tech
-prometheus (monitoring): http://prmetheus.satoshi.tech
-
-grafana2 (monitoring2): http://grafana2.satoshi.tech
-
+- kibana (logging): http://kibana.satoshi.tech
+- grafana (monitoring): http:grafana.satoshi.tech
+- prometheus (monitoring): http://prometheus.satoshi.tech
+- grafana2 (monitoring2): http://grafana2.satoshi.tech
+- kubernetes-dashboard: http://kubernetes-dashboard.satoshi.tech
 
 ### 5.3 Security considerations
 
