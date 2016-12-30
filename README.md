@@ -152,8 +152,9 @@ Dashboard addon let you see k8s services and containers via a nice GUI.
 
     kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
     kubectl get all --namespace=kube-system     <-- carefull dashboard is running in namespace=kube-system
-
-Access GUI: http://any_minion_node_ip:30888 
+    
+    kubectl describe svc/kubernetes-dashboard --namespace=kube-system    <-- Find out the nodePort
+Access GUI: http://any_minion_node_ip:30xxx 
 
 
 # 5. LoadBalancers
