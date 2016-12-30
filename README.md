@@ -142,7 +142,7 @@ Other good dashboards :
     kubectl apply -f monitoring2
     kubectl get all --namespace=monitoring2
 
-** Access services**
+**Access services**
 
 - Grafana2: http://any_minion_node_ip:30002
 
@@ -211,7 +211,7 @@ Based on which name you use to access the lb_node, traefik will forward to the r
 Now you need to edit the configuration:
 
     nano traefik/traefik-daemonset.yaml
-        [acme]   <-- set you data for auto certification
+        [acme]   <-- set your data for auto certification
 
 Create the dynamic proxy to be able to connect your service from the internet.
 
@@ -377,6 +377,5 @@ Delete the corresponding namespace, all related containers/services will be dest
 # 8. Future work
 
 - Use different firewalls security group: k8s, k8s-dmz, k8s-master, to be ready for production
-- Replace haproxy with traefik?
 - Use persistent data for Elasticsearch and prometheus
 - Fix prometheus k8s_pod scraping both port 80 and 9102...
