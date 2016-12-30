@@ -178,7 +178,7 @@ Add/remove services? please edit service-loadbalancer.yaml*
 **Access services**
 
 - kibana (logging): http://lb_node_ip:5601
-- grafana (monitoring): http://lb_node_ip:3000
+- grafana (monitoring): http://lb_node_ip:3000   (admin/admin)
 - prometheus (monitoring): http://lb_node_ip:3000
 - grafana2 (monitoring2): http://lb_node_ip:3002
 - kubernetes-dashboard: http://lb_node_ip:9999
@@ -191,7 +191,7 @@ To experience the full power of traefik, please purchase a domain name (ex: sato
 
 - satoshi.tech --> lb_node_ip
 
-Then for each services you will use, create a dns:
+Then for each services you will use, create a dns A record:
 
 - kibana.satoshi.tech --> lb_node_ip
 - grafana.satoshi.tech --> lb_node_ip
@@ -215,11 +215,11 @@ Create the dynamic proxy to be able to connect your service from the internet.
     kubectl get all --all-namespaces  <-- if traefik pod can't get created, probably issue with port 443 on loadbalancer --> see troubleshooting section
 
 **Access services**
-Always use login/pass: test/test
+If set in traefik, please use login/pass: test/test
 You can use http or https
 
 - kibana (logging): http://kibana.satoshi.tech
-- grafana (monitoring): http:grafana.satoshi.tech
+- grafana (monitoring): http:grafana.satoshi.tech   (admin/admin)
 - prometheus (monitoring): http://prometheus.satoshi.tech
 - grafana2 (monitoring2): http://grafana2.satoshi.tech
 - kubernetes-dashboard: http://kubernetes-dashboard.satoshi.tech
