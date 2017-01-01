@@ -135,3 +135,10 @@
      security_group: "{{ k8s_security_group_name }}"
      start_port: 8080
      end_port: 8080
+
+  - name: traefik
+    local_action:
+     module: cs_securitygroup_rule
+     security_group: "{{ k8s_security_group_name }}"
+     start_port: 80
+     end_port: 80
