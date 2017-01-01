@@ -26,7 +26,7 @@ data:
     entryPoint = "https"
     onDemand = true
     onHostRule = true
-    caServer = "https://acme-staging.api.letsencrypt.org/directory"
+    #caServer = "https://acme-staging.api.letsencrypt.org/directory"   # comment this line for production
     [[acme.domains]]
     main = "satoshi.tech"
 ---
