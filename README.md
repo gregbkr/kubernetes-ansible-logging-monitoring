@@ -24,7 +24,16 @@ More info: you can find an overview of that setup on my blog: https://greg.satos
 
     git clone https://github.com/gregbkr/kubernetes-ansible-logging-monitoring.git k8s && cd k8s
 
-### 1.2 Deploy k8s on a cloudstack infra
+### 1.2 Install kubectl
+
+Kubeclt is your admin local client to pilot the k8s cluster.
+Please use the same version as server. You will be able to talk and pilot k8s with this tool.
+
+    curl -O https://storage.googleapis.com/kubernetes-release/release/v1.4.6/bin/linux/amd64/kubectl
+    chmod +x kubectl
+    mv kubectl /usr/local/bin/kubectl
+
+### 1.3 Deploy k8s for a cloudstack infra
 
 I will use the nice setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
 I just added few lines in file: ansible/roles/k8s/templates/k8s-node.j2 to be able to collect logs with fluentd
@@ -39,19 +48,9 @@ Run recipe:
 	ansible-playbook ansible/k8s.yml
 	watch kubectl get node    <-- wait for the nodes to be up
 
-### 1.3 Install kubectl
-
-Kubeclt is your admin local client to pilot the k8s cluster.
-Please use the same version as server. You will be able to talk and pilot k8s with this tool.
-
-    curl -O https://storage.googleapis.com/kubernetes-release/release/v1.4.6/bin/linux/amd64/kubectl
-    chmod +x kubectl
-    mv kubectl /usr/local/bin/kubectl
-
 ### 1.4 Checks:
 	
 	kubectl get all --all-namespaces    <-- should have no error here
-	
 	
 # 2. Deploy logging (efk) to collect k8s & containers events
 	
