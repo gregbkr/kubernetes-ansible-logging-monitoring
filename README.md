@@ -262,7 +262,8 @@ For service-loadbalancer, try to access new_lb_minion_ip:5601
 For trafik, add a dns A-record kibana.satoshi.tech --> new_lb_minion_ip so we will balance dns resolution to the old and new lb_node.
 Test some ping, and access kibana.satoshi.tech few times...	
 
-# 6. Secure your k8s access with certificates
+
+# 6. Secure your k8s access with certificates (optional demonstration)
 
 kubectl pilot k8s via the api server already on a secured port 443 in https.
 We will now create a certicate autority, to issue a certificate for the api, and for your admin client, to get even higher level of authentification.
@@ -290,32 +291,32 @@ Declare your master Ip (or domain) to the server cert
 
 Initialize a CA
 
-    cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+    cfssl gencert -initca ca-csr.json | cfssljson -bare ca/ca
 
 Create an api server cert
 
 ```
 cfssl gencert \
--ca=ca.pem \
--ca-key=ca-key.pem \
+-ca=ca/ca.pem \
+-ca-key=ca/ca-key.pem \
 -config=ca-config.json \
 -profile=server \
 kube-apiserver-server-csr.json | cfssljson -bare master/kube-apiserver-server
 ```
 
-    cp ca.pem master
-    cd ..
+    cp ca/ca.pem master
 
 Create kubeclt client cert
 
 ```
 cfssl gencert \
--ca=ca.pem \
--ca-key=ca-key.pem \
+-ca=ca/ca.pem \
+-ca-key=ca/ca-key.pem \
 -config=ca-config.json \
 -profile=client \
 kubernetes-admin-user.csr.json | cfssljson -bare kubectl/kubernetes-admin-user
 ```
+     
     kubectl config set-cluster secure --server=https://185.19.30.189:443 --certificate-authority=tls/ca.pem --embed-certs=true
 
 ```
@@ -357,7 +358,45 @@ Test
     curl --cert tls/kubectl/kubernetes-admin-user.pem --key tls/kubectl/kubernetes-admin-user-key.pem --cacert tls/master/ca.pem https://185.19.30.189/api -v
     kubeclt get node
 
+Create kubelet client cert
 
+```
+cfssl gencert \
+-ca=ca/ca.pem \
+-ca-key=ca/ca-key.pem \
+-config=ca-config.json \
+-profile=client \
+kubelet-client-csr.json | cfssljson -bare minion/kubelet/kubelet-client
+```
+
+Edit minion node
+
+Copy and mv the file:
+
+    scp -r -i ~/.ssh/id_rsa_foobar tls/minion core@185.19.30.189:/home/core
+    ssh -i ~/.ssh/id_rsa_foobar core@185.19.3.31
+     
+    mkdir /etc/kubernetes
+    mv minion/* /etc/kubernetes/.
+
+```
+sudo vim /etc/systemd/system/kube-kubelet.service	  
+--api-servers=https://185.19.30.189:443 \
+--kubeconfig=/etc/kubernetes/kubelet/kubelet.kubeconfig \
+```
+
+    sudo systemctl daemon-reload
+    sudo systemctl restart kube-apiserver.service
+    
+Check logs:
+
+    journalctl --since "10 minutes ago" -u kube-kubelet --no-pager
+    
+Try 
+
+    kubectl get node
+
+*All services (kube-proxy, kube-client, kube-controller) can be set to use certificate. But this is a subject for another setup.*
 
 # 7. Troubleshooting
 
