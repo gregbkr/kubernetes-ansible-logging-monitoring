@@ -262,7 +262,7 @@ For service-loadbalancer, try to access new_lb_minion_ip:5601
 For trafik, add a dns A-record kibana.satoshi.tech --> new_lb_minion_ip so we will balance dns resolution to the old and new lb_node.
 Test some ping, and access kibana.satoshi.tech few times...	
 
-# 6. Secure your kubernetes access with certificate:
+# 6. Secure your k8s access with certificates
 
 kubectl pilot k8s via the api server already on a secured port 443 in https.
 We will now create a certicate autority, to issue a certificate for the api, and for your admin client, to get even higher level of authentification.
@@ -293,7 +293,8 @@ Create an api server cert
 
     mkdir master
 
-```cfssl gencert \
+```
+cfssl gencert \
 -ca=ca.pem \
 -ca-key=ca-key.pem \
 -config=ca-config.json \
@@ -342,10 +343,12 @@ Edit master
 
 ```
 sudo vim /etc/systemd/system/kube-apiserver.service
+
 --client-ca-file=/etc/kubernetes/ca.pem \
 --tls-cert-file=/etc/kubernetes/kube-api-server-server.pem \
 --tls-private-key-file=/etc/kubernetes/kube-apiserver-server-key.pem \
 ```
+
     sudo systemctl daemon-reload
     sudo systemctl restart kube-apiserver.service
 	
