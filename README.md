@@ -281,8 +281,11 @@ You need GO 1.6+ and the GOPATH set
     go get -u github.com/cloudflare/cfssl/cmd/cfssl
     go get -u github.com/cloudflare/cfssl/cmd/...
 
-    git clone https://github.com/kelseyhightower/docker-kubernetes-tls-guide.git  tls
     cd tls
+    mkdir kubeclt master minion
+
+Declare your master Ip (or domain) to the server cert
+
     nano kube-apiserver-server-csr.json     <-- add your master_ip in hosts section
 
 Initialize a CA
@@ -290,8 +293,6 @@ Initialize a CA
     cfssl gencert -initca ca-csr.json | cfssljson -bare ca
 
 Create an api server cert
-
-    mkdir master
 
 ```
 cfssl gencert \
@@ -306,9 +307,6 @@ kube-apiserver-server-csr.json | cfssljson -bare master/kube-apiserver-server
     cd ..
 
 Create kubeclt client cert
-
-    mkdir tls/kubeclt
-    cd tls
 
 ```
 cfssl gencert \
@@ -358,6 +356,7 @@ Test
 
     curl --cert tls/kubectl/kubernetes-admin-user.pem --key tls/kubectl/kubernetes-admin-user-key.pem --cacert tls/master/ca.pem https://185.19.30.189/api -v
     kubeclt get node
+
 
 
 # 7. Troubleshooting
