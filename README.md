@@ -262,8 +262,102 @@ For service-loadbalancer, try to access new_lb_minion_ip:5601
 For trafik, add a dns A-record kibana.satoshi.tech --> new_lb_minion_ip so we will balance dns resolution to the old and new lb_node.
 Test some ping, and access kibana.satoshi.tech few times...	
 
+# 6. Secure your kubernetes access with certificate:
 
-# 6. Troubleshooting
+kubectl pilot k8s via the api server already on a secured port 443 in https.
+We will now create a certicate autority, to issue a certificate for the api, and for your admin client, to get even higher level of authentification.
+
+The lines below are based on the work of Kelsey and the cloudflare easy CA.
+https://github.com/kelseyhightower/docker-kubernetes-tls-guide
+https://github.com/cloudflare/cfssl
+
+Install your own PKI infra tool: cfssl 
+You need GO 1.6+ and the GOPATH set
+
+    export GOPATH=$HOME/work
+    export PATH=$PATH:/usr/local/go/bin
+    export PATH=$PATH:$GOPATH/bin
+
+    go get -u github.com/cloudflare/cfssl/cmd/cfssl
+    go get -u github.com/cloudflare/cfssl/cmd/...
+
+    git clone https://github.com/kelseyhightower/docker-kubernetes-tls-guide.git  tls
+    cd tls
+    nano kube-apiserver-server-csr.json     <-- add your master_ip in hosts section
+
+Initialize a CA
+
+    cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+
+Create an api server cert
+
+    mkdir master
+
+```cfssl gencert \
+-ca=ca.pem \
+-ca-key=ca-key.pem \
+-config=ca-config.json \
+-profile=server \
+kube-apiserver-server-csr.json | cfssljson -bare master/kube-apiserver-server
+```
+
+    cp ca.pem master
+    cd ..
+
+Create kubeclt client cert
+
+    mkdir tls/kubeclt
+    cd tls
+
+```
+cfssl gencert \
+-ca=ca.pem \
+-ca-key=ca-key.pem \
+-config=ca-config.json \
+-profile=client \
+kubernetes-admin-user.csr.json | cfssljson -bare kubectl/kubernetes-admin-user
+```
+    kubectl config set-cluster secure --server=https://185.19.30.189:443 --certificate-authority=tls/ca.pem --embed-certs=true
+
+```
+kubectl config set-credentials admin \
+--client-key=tls/kubectl/kubernetes-admin-user-key.pem \
+--client-certificate=tls/kubectl/kubernetes-admin-user.pem \
+--embed-certs=true
+```
+
+    kubectl config set-context secure --cluster=secure --user=admin
+    kubectl config use-context secure
+
+Copy tls/master folder to node master
+
+    scp -r -i ~/.ssh/id_rsa_foobar tls/master core@185.19.30.189:/home/core
+
+Edit master
+
+    ssh -i ~/.ssh/id_rsa_foobar core@185.19.30.189
+     
+    mkdir /etc/kubernetes
+    mv master/* /etc/kubernetes/.
+
+```
+sudo vim /etc/systemd/system/kube-apiserver.service
+--client-ca-file=/etc/kubernetes/ca.pem \
+--tls-cert-file=/etc/kubernetes/kube-api-server-server.pem \
+--tls-private-key-file=/etc/kubernetes/kube-apiserver-server-key.pem \
+```
+    sudo systemctl daemon-reload
+    sudo systemctl restart kube-apiserver.service
+	
+*Note: this systemclt config will be erased at the next reboot. If you want to use cert, edit ansible master node template with the right config, then deploy a new master. Then generate certs...*
+
+Test
+
+    curl --cert tls/kubectl/kubernetes-admin-user.pem --key tls/kubectl/kubernetes-admin-user-key.pem --cacert tls/master/ca.pem https://185.19.30.189/api -v
+    kubeclt get node
+
+
+# 7. Troubleshooting
 
 ### If problem starting elasticsearch v5: (fix present in roles/k8s/templates/k8s-node.j2)
 - manually on all node: fix an issue with hungry es v5
