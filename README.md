@@ -484,7 +484,7 @@ Then delete and recreate traefik, should be all good.
     apt install httpie
     http --verify=no --auth test:test https://kibana.satoshi.tech -v
 
-# 7. Annexes
+# 8. Annexes
 
 ### Shell Alias for K8s
 ```
@@ -510,7 +510,7 @@ Delete the corresponding namespace, all related containers/services will be dest
     kubectl delete namespace monitoring
     kubectl delete namespace logging
 
-# 8. Future work
+# 9. Future work
 
 - Use different firewalls security group: k8s, k8s-dmz, k8s-master, to be ready for production
 - Use persistent data for Elasticsearch and prometheus
