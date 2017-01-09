@@ -275,6 +275,7 @@ https://github.com/cloudflare/cfssl
 Install your own PKI infra tool: cfssl 
 You need GO 1.6+ and the GOPATH set
 
+    apt install golang-go
     export GOPATH=$HOME/work
     export PATH=$PATH:/usr/local/go/bin
     export PATH=$PATH:$GOPATH/bin
@@ -283,17 +284,17 @@ You need GO 1.6+ and the GOPATH set
     go get -u github.com/cloudflare/cfssl/cmd/...
 
     cd tls
-    mkdir kubeclt master minion
+    mkdir kubectl master minion
 
 Declare your master Ip (or domain) to the server cert
 
     nano kube-apiserver-server-csr.json     <-- add your master_ip in hosts section
 
-Initialize a CA
+**Initialize a CA**
 
     cfssl gencert -initca ca-csr.json | cfssljson -bare ca/ca
 
-Create an api server cert
+**Create an api server cert**
 
 ```
 cfssl gencert \
@@ -306,7 +307,7 @@ kube-apiserver-server-csr.json | cfssljson -bare master/kube-apiserver-server
 
     cp ca/ca.pem master
 
-Create kubeclt client cert
+**Create kubeclt client cert**
 
 ```
 cfssl gencert \
@@ -317,12 +318,12 @@ cfssl gencert \
 kubernetes-admin-user.csr.json | cfssljson -bare kubectl/kubernetes-admin-user
 ```
      
-    kubectl config set-cluster secure --server=https://185.19.30.189:443 --certificate-authority=tls/ca.pem --embed-certs=true
+    kubectl config set-cluster secure --server=https://185.19.30.189:443 --certificate-authority=master/ca.pem --embed-certs=true
 
 ```
 kubectl config set-credentials admin \
---client-key=tls/kubectl/kubernetes-admin-user-key.pem \
---client-certificate=tls/kubectl/kubernetes-admin-user.pem \
+--client-key=kubectl/kubernetes-admin-user-key.pem \
+--client-certificate=kubectl/kubernetes-admin-user.pem \
 --embed-certs=true
 ```
 
@@ -331,7 +332,7 @@ kubectl config set-credentials admin \
 
 Copy tls/master folder to node master
 
-    scp -r -i ~/.ssh/id_rsa_foobar tls/master core@185.19.30.189:/home/core
+    scp -r -i ~/.ssh/id_rsa_foobar master core@185.19.30.189:/home/core
 
 Edit master
 
@@ -355,10 +356,11 @@ sudo vim /etc/systemd/system/kube-apiserver.service
 
 Test
 
-    curl --cert tls/kubectl/kubernetes-admin-user.pem --key tls/kubectl/kubernetes-admin-user-key.pem --cacert tls/master/ca.pem https://185.19.30.189/api -v
-    kubeclt get node
+    curl --cert kubectl/kubernetes-admin-user.pem --key kubectl/kubernetes-admin-user-key.pem --cacert master/ca.pem https://185.19.30.189/api -v
+    kubectl get node
 
-Create kubelet client cert
+
+**Create kubelet client cert**
 
 ```
 cfssl gencert \
@@ -373,7 +375,7 @@ Edit minion node
 
 Copy and mv the file:
 
-    scp -r -i ~/.ssh/id_rsa_foobar tls/minion core@185.19.30.189:/home/core
+    scp -r -i ~/.ssh/id_rsa_foobar minion core@185.19.30.189:/home/core
     ssh -i ~/.ssh/id_rsa_foobar core@185.19.3.31
      
     mkdir /etc/kubernetes
