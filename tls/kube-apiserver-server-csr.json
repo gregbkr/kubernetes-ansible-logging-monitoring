@@ -1,0 +1,22 @@
+{
+  "CN": "*.kubestack.io",
+  "hosts": [
+    "127.0.0.1",
+    "185.19.30.189",
+    "*.kubestack.io",
+    "*.c.kubestack.internal"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "Kubernetes",
+      "OU": "API Server",
+      "ST": "Oregon"
+    }
+  ]
+}
