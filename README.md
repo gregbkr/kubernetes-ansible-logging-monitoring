@@ -33,6 +33,14 @@ Please use the same version as server. You will be able to talk and pilot k8s wi
     chmod +x kubectl
     mv kubectl /usr/local/bin/kubectl
 
+Autocompletion
+
+    source <(kubectl completion bash)
+    kubeclt get nod +[TAB]
+    
+If issues, see troubleshooting section. 
+
+
 ### 1.3 Deploy k8s for a cloudstack infra
 
 I will use the nice setup made by Seb: https://www.exoscale.ch/syslog/2016/05/09/kubernetes-ansible/
@@ -401,6 +409,19 @@ Try
 *All services (kube-proxy, kube-client, kube-controller) can be set to use certificate. But this is a subject for another setup.*
 
 # 7. Troubleshooting
+
+### Kubectl autocompletion not working
+
+Probably your custom bash profile is interfering with the sourcing. 
+- Use kubectl completion bash > /etc/bash_completion.d/kubectl
+- And make sure that lines are uncomment in 
+```
+nano  ~/.bashrc
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+    . /etc/bash_completion
+fi
+```
+Then logon and try again.
 
 ### If problem starting elasticsearch v5: (fix present in roles/k8s/templates/k8s-node.j2)
 - manually on all node: fix an issue with hungry es v5
