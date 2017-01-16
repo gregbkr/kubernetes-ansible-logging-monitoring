@@ -2,6 +2,9 @@
 
 ![k8s_Infra1.jpg](https://github.com/gregbkr/kubernetes-ansible-logging-monitoring/raw/master/media/k8s-infra1.JPG)
 
+## Updates ;-)
+An even better setup with kargo (deploy to aws, azure, baremetal, and hot k8s migration) is available here --> https://github.com/gregbkr/kubernetes-kargo-logging-monitoring
+
 ## What you will get:
 - 1 master node running : k8s for container orchestration, it will pilot and gives work to the minions
 - 2(or more) minion/slave/worker nodes : running the actual containers and doing the actual work
